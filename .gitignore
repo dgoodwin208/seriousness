@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+ENV/
+.venv/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# CSV data files
+*.csv
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# System
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Local development
+requirements.txt
+*.py
+*.xml
+*.png
