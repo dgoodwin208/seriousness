@@ -168,35 +168,73 @@ class SeriousnessEvaluator {
 
     displayResults(evaluation) {
         this.currentEvaluation = evaluation;
-        
+
         const resultsSection = document.getElementById('results');
         const resultsContent = document.getElementById('results-content');
+
+        // Get scores from new schema
+        const raw = evaluation.raw || {};
+        const adjusted = evaluation.adjusted || {};
+        const subject = evaluation.subject || evaluation.entity;
+        const context = evaluation.context || evaluation.system;
 
         // Create results HTML
         const html = `
             <div class="evaluation-result">
                 <div class="entity-context">
-                    <div class="entity-name">${this.escapeHtml(evaluation.entity)}</div>
-                    <div class="context-name">in the context of ${this.escapeHtml(evaluation.system)}</div>
+                    <div class="entity-name">${this.escapeHtml(subject)}</div>
+                    <div class="context-name">in the context of ${this.escapeHtml(context)}</div>
                 </div>
-                
-                <div class="scores">
-                    <div class="score-item">
-                        <div class="score-value ${this.getScoreClass(evaluation.scores.E)}">${evaluation.scores.E.toFixed(1)}</div>
-                        <div class="score-label">Energy (E)</div>
-                    </div>
-                    <div class="score-item">
-                        <div class="score-value ${this.getScoreClass(evaluation.scores.v)}">${evaluation.scores.v.toFixed(1)}</div>
-                        <div class="score-label">Efficiency (v)</div>
-                    </div>
-                    <div class="score-item">
-                        <div class="score-value ${this.getScoreClass(evaluation.scores.alpha)}">${evaluation.scores.alpha.toFixed(1)}</div>
-                        <div class="score-label">Order (α)</div>
+
+                <div class="designation">
+                    <strong>Designation:</strong> ${this.escapeHtml(evaluation.designation || 'N/A')}
+                </div>
+
+                ${evaluation.milestone ? `
+                <div class="milestone">
+                    <strong>Milestone:</strong> ${this.escapeHtml(evaluation.milestone)}
+                </div>
+                ` : ''}
+
+                <div class="scores-section">
+                    <h3>Raw Scores (Direction)</h3>
+                    <div class="scores">
+                        <div class="score-item">
+                            <div class="score-value ${this.getScoreClass(raw.E_raw)}">${(raw.E_raw || 0).toFixed(2)}</div>
+                            <div class="score-label">Energy (E_raw)</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-value ${this.getScoreClass(raw.v_raw)}">${(raw.v_raw || 0).toFixed(2)}</div>
+                            <div class="score-label">Efficiency (v_raw)</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-value ${this.getScoreClass(raw.alpha_raw)}">${(raw.alpha_raw || 0).toFixed(2)}</div>
+                            <div class="score-label">Order (α_raw)</div>
+                        </div>
                     </div>
                 </div>
-                
+
+                <div class="scores-section">
+                    <h3>Adjusted Scores (With Substance)</h3>
+                    <div class="scores">
+                        <div class="score-item">
+                            <div class="score-value ${this.getScoreClass(adjusted.E_adj)}">${(adjusted.E_adj || 0).toFixed(2)}</div>
+                            <div class="score-label">Energy (E_adj)</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-value ${this.getScoreClass(adjusted.v_adj)}">${(adjusted.v_adj || 0).toFixed(2)}</div>
+                            <div class="score-label">Efficiency (v_adj)</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-value ${this.getScoreClass(adjusted.alpha_adj)}">${(adjusted.alpha_adj || 0).toFixed(2)}</div>
+                            <div class="score-label">Order (α_adj)</div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="rationale">
-                    ${this.escapeHtml(evaluation.rationale)}
+                    <h3>Rationale</h3>
+                    <p>${this.escapeHtml(evaluation.rationale || 'No rationale provided.')}</p>
                 </div>
             </div>
         `;
@@ -254,9 +292,13 @@ class SeriousnessEvaluator {
         const feedbackText = document.getElementById('feedback-text').value.trim();
         
         const feedbackData = {
-            entity: this.currentEvaluation?.entity,
-            context: this.currentEvaluation?.system,
-            evaluation: this.currentEvaluation?.scores,
+            entity: this.currentEvaluation?.subject || this.currentEvaluation?.entity,
+            context: this.currentEvaluation?.context || this.currentEvaluation?.system,
+            evaluation: {
+                raw: this.currentEvaluation?.raw,
+                adjusted: this.currentEvaluation?.adjusted,
+                designation: this.currentEvaluation?.designation
+            },
             feedback_type: feedbackType,
             feedback_text: feedbackText,
             timestamp: new Date().toISOString()

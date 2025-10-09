@@ -29,8 +29,12 @@ Thumbs.db
 *.tmp
 *.temp
 
+# Cache directory
+cache/
+
 # Local development
 requirements.txt
 *.py
 *.xml
 *.png
+.vercel

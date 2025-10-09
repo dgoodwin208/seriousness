@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Seriousness Evaluation Prompt - IsXSerious.com</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+        onload="renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false}
+            ]
+        });"></script>
+    <style>
+        .prompt-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            line-height: 1.8;
+        }
+        .prompt-content h2 {
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 0.5rem;
+        }
+        .prompt-content h3 {
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            color: #34495e;
+        }
+        .prompt-content pre {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            border-left: 4px solid #e74c3c;
+        }
+        .prompt-content code {
+            background: #f8f9fa;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .prompt-content ul, .prompt-content ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+        .prompt-content li {
+            margin: 0.5rem 0;
+        }
+        .equation-block {
+            margin: 2rem 0;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #e74c3c;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-container">
+                <h1><a href="index.html">IsXSerious.com</a></h1>
+                <ul>
+                    <li><a href="essay.html">Read the Essay</a></li>
+                    <li><a href="prompt.html">The Prompt</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="prompt-content">
+        <a href="index.html" class="back-link">← Back to Home</a>
+
+        <h1>The Seriousness Evaluation Prompt</h1>
+        <p class="subtitle">The complete prompt template used to evaluate the thermodynamic seriousness of entities</p>
+
+        <div class="info-box">
+            <strong>Note:</strong> This prompt is used with Claude 3.7 Sonnet to evaluate whether entities are serious, unserious, or anti-serious within a given context. The placeholders <code>{entity}</code> and <code>{context}</code> are replaced with specific values for each evaluation.
+        </div>
+
+        <h2>Objective</h2>
+        <p>Evaluate the Seriousness of <strong>{entity}</strong> within <strong>{context}</strong>. Seriousness is both directional (<strong>normalized scores in [-1, 1]</strong> for <strong>three primary dimensions</strong>) and magnitude (proportional to the estimated <strong>activation energy</strong> to reach the next milestone)</p>
+        <p>Return a JSON only (no prose), following the technical explanation and schema below.</p>
+
+        <h2>Three dimensions of Seriousness</h2>
+        <p>Seriousness for a human system (in this case, {context}) is the ability to go against energy gradients and grow the system toward beauty (success, accomplishment, etc.). The foundation of seriousness is the second law of thermodynamics, which says that the energy into a system must be greater than the entropic force:</p>
+
+        <div class="equation-block">
+            $$\dot{E_{avail}} \times v \ge T k_B \ln(M) \alpha N^{(\alpha-1)} \frac{dN}{dt}$$
+        </div>
+
+        <p>This equation set the baseline: ideally the left side is much greater than the right side, but it articulates the physical variables of a system. While many of these values are fixed or ignorable (temperature T, boltzmann constant, M number of interaction types) the three primary dimensions for the seriousness of a system are:</p>
+
+        <ul>
+            <li><strong>E</strong> (Energy and resources available to the system, flux over time): This includes resources such as raw materials and food that are brought into {context} because of {entity}. A high normalized <strong>E</strong> increases the available resources to {context}, a low <strong>E</strong> decreases the resources.</li>
+            <li><strong>v</strong> (Infrastructure & conversion efficiency of <strong>E</strong>): This includes buildings, technologies, institutional capacity and any CapEx that harnesses resources for the system ({context}). A high normalized <strong>v</strong> score means {entity} improves throughput, learning, or system catalytic ability. A low <strong>v</strong> means the opposite, harming the system's ability convert raw resources for the good of the system.</li>
+            <li><strong>α</strong> (Order: coordination vs. chaos): This is the network scaling coefficient which, in absolute terms, is ideally between 1 (below 1 is a soulless prison) and 2 (above 2 is a chaotic mob). It encapsulates a shared philosophy, cultural orientation, reliability of each node in the system and the number of interactions in the social graph. A high normalized alpha score means the entity reduces internal disorder, such as inspires cooperation, creates harmony, builds stable structure. A low normalized α increases division and factions, demoralizes individual growth within the system and generally represents steps toward internal chaos.</li>
+        </ul>
+
+        <p>We are evaluating whether {entity} is serious, unserious or anti-serious within {context}.</p>
+
+        <h2>Activation Energy</h2>
+        <p>Seriousness requires <em>substance</em>: For {entity} to be serious in the context of {context}, it must have the capacity and clarity to reach the next milestone. The physical metaphor is the <strong>activation energy</strong> from chemistry, in which existing bonds in one stable state are broken to form new bonds in a new stable state. Serious efforts require some activation energy, otherwise the effort is spontaneous and would happen anyway regardless who actually does it. For {entity} to actually be serious in its context, it must have (or had, if we're querying about the past) the substantial ability to marshall the resources necessary to move in the serious direction and reach the next stable state (eg, a milestone of progress).</p>
+
+        <p><strong>Example:</strong> A child who dreams of a building next-generation nuclear reactor is directionally serious, but not yet capable of reaching a first milestone so their seriousness vector would be scaled down. Alternatively, an anti-nuclear protestor who successfully shuts down a nuclear plant is directionally anti-serious (directly damaging) and since they accomplished their goal (capacity matched the task), their vector would be the maximum -1 in the <strong>E</strong> dimension.</p>
+
+        <p>If the entity is not defined with an obvious goal, make your best extrapolation of what "{entity}" is trying to accomplish.</p>
+
+        <h2>Measurement (Operationalization and Rules)</h2>
+        <p>Each core dimension (<strong>E</strong>, <strong>v</strong>, <strong>α</strong>) is mapped to <strong>[-1, 1]</strong> where <strong>-1 = directly destructive</strong> to the dimension, <strong>0 = neutral/ineffectual</strong>, <strong>1 = maximally constructive</strong> in the context. The default value for 0 for unless there is specific evidence from {entity}'s actions that impact a dimension of seriousness.</p>
+
+        <h3>1) Raw Seriousness Dimensions</h3>
+        <ol>
+            <li><strong>E_raw</strong>
+                <ul>
+                    <li>Positive if the agent <em>adds</em> important resources toward {context} (funding, power, compute, materials, metals joules, food). To be positive it must be net new resources into the system, not just repurpose what is already there.</li>
+                    <li>Negative if {entity} <em>destroys or blocks</em> resource formation/capture for {context}.</li>
+                    <li>Zero, or near to zero, if {entity} did no actions to influence net resources into the system.</li>
+                </ul>
+            </li>
+            <li><strong>v_raw</strong>
+                <ul>
+                    <li>Percentage of utilization of E (repeatable processes, factories, tooling, standards, uptime, throughput) or better use of existing raw materials (energy, power, food, etc).</li>
+                    <li>Positive if capacity with >1-year half-life grows per unit input; negative if capacity is decommissioned, stranded, or made brittle.</li>
+                    <li>Zero, or near to zero, if {entity} did no actions to develop useful infrastructure that led to better utilization of resources in the thermodynamic system sense.</li>
+                </ul>
+            </li>
+            <li><strong>alpha_raw</strong>
+                <ul>
+                    <li>Scaling exponent of the complex system: The N nodes of a system have a number of states proportional to $N^\alpha$.</li>
+                    <li>This means if alpha gets too high, the entropic pull of the system becomes too great (in absolute terms, $\alpha>2$ is when real systems become turbulent) and chaos takes over. Alternatively, a system with too little social interaction ($\alpha \le 1$), indicates a restrictive and inhuman system.</li>
+                    <li>Zero, or near to zero, if {entity} did no actions impact the internal order, and therefore scaling exponent, of the parts in {context} (eg, if a country, the parts are the citizen).</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>2) Substance Proportional for needed Activation Energy</h3>
+        <ul>
+            <li><strong>Activation Energy (Ea) and sufficiency factor:</strong> Let <code>Ea_required</code> be the estimated minimum concentrated effort to reach the next stable milestone. Let <code>Ea_committed</code> be the verified, attributable effort toward that milestone, and so A_factor would be the percentage of resources to the required activation energy. For each of the three dimensions of seriousness, calculate:
+                <ul>
+                    <li><code>A_factor = min( Ea_committed / Ea_required, 1.0 )</code> - do your best to estimate what the Ea_required would be in theory for each of the three dimensions. Eg, a person highly credible in discovering resources may not be credible in impacting social order.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>3) Substance-adjusted scores</h3>
+        <p>Each normalized dimension is multiplied by <code>A_factor</code> to reflect whether the subject can <em>actually</em> cross the threshold.</p>
+        <ul>
+            <li><code>E_adj = E_raw * A_factor_E</code></li>
+            <li><code>v_adj = v_raw * A_factor_v</code></li>
+            <li><code>alpha_adj = alpha_raw * A_factor_alpha</code></li>
+        </ul>
+
+        <h3>4) Designation</h3>
+        <p>Calculate the magnitude of the vector: $s= \sqrt{E_{adj}^2 + v_{adj}^2 + \alpha_{adj}^2}$</p>
+        <ul>
+            <li><strong>Serious</strong>: $s>0.2$, all values positive</li>
+            <li><strong>Unserious</strong>: $s\le 0.2$</li>
+            <li><strong>Anti-serious</strong>: $s>0.2$, any one of the $(E_{adj}, v_{adj}$ and $\alpha_{adj}) < -0.1$</li>
+            <li>If none of these, <strong>"Serious (contested)"</strong> and include rationale.</li>
+        </ul>
+
+        <h3>5) Stakes (qualitative)</h3>
+        <p>Is there a <em>clear vector of consequence</em> between what is feared or rejected (the decay state) and what is desired (the beauty state)? In other words, is there something real at risk — a meaningful difference between success and failure?</p>
+
+        <h3>6) Fungibility (qualitative)</h3>
+        <p>Would this progress occur <em>without</em> the agent's directed effort? In chemistry, this would be whether the reaction is spontaneous or not. Seriousness is inversely proportional to inevitability. If the outcome would happen anyway, the action carries little Seriousness.</p>
+
+        <h2>Evidence Requirements</h2>
+        <ul>
+            <li>Use all available sources with a dynamic evaluation of the trustworthiness. Tier sources T1–T4 by quality and general knowledge (eg, everybody knows of Mr. Rogers).</li>
+            <li>Give commentary in the evidence tiers for later interpretability.</li>
+        </ul>
+
+        <h2>Output Schema (JSON only)</h2>
+        <pre><code>{
+  "subject": "{entity}",
+  "context": "{context}",
+  "milestone": "Next stable state being assessed",
+  "time_horizon": {"start": "YYYY-MM-DD", "end": "YYYY-MM-DD"},
+  "evidence_tiers": {"T1": ["..."], "T2": ["..."], "T3": ["..."], "T4": ["..."]},
+  "raw": {
+    "E_raw": -1.0_to_1.0,
+    "v_raw": -1.0_to_1.0,
+    "alpha_raw": -1.0_to_1.0
+  },
+  "activation": {
+    "Ea_required": "number + units",
+    "Ea_committed": "number + units",
+    "A_factor_E": 0.0_to_1.0,
+    "A_factor_v": 0.0_to_1.0,
+    "A_factor_alpha": 0.0_to_1.0
+  },
+  "adjusted": {
+    "E_adj": -1.0_to_1.0,
+    "v_adj": -1.0_to_1.0,
+    "alpha_adj": -1.0_to_1.0
+  },
+  "Stakes": "Concise 80-120 word answer to if there was clear vector of consequence between what is feared or rejected by the entity in the context",
+  "Fungibility": "Concise 40-80 word answer to if the entity's work would have randomly been done by somebody else",
+  "designation": "Serious | Unserious | Anti-serious",
+  "rationale": "&lt;A concise 80-120 word justification based on the entity's seriousness. Focus on energy, efficiency, and order. Ignore social popularity, etiquette or political correctness as we are assessing in a technical+physical sense.&gt;"
+}</code></pre>
+
+        <h2>Guardrails for the Model</h2>
+        <ul>
+            <li>If the Ea_required cannot be estimated, possibly because of difficulty understanding the goal or purpose of the {entity}, return <code>"designation": "Unserious"</code> with <code>A_factor ≤ 0.2</code> and list missing inputs.</li>
+            <li>Clamp all outputs to [-1, 1]. Round to 2 decimals in JSON. No prose outside JSON.</li>
+            <li>Ensure the three dimensions are evaluated <strong>independently</strong>. If one dimension is zero (e.g., no new resources added), do not let reasoning about impact on efficiency or coordination influence that score.</li>
+        </ul>
+
+        <div class="info-box" style="margin-top: 3rem;">
+            <strong>Want to try it yourself?</strong> <a href="index.html">Evaluate an entity's seriousness</a> or <a href="essay.html">read the full essay</a> to understand the theoretical foundation.
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 IsXSerious.com - A project exploring the physics of cultural progress</p>
+        </div>
+    </footer>
+</body>
+</html>
