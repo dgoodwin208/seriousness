@@ -165,9 +165,40 @@ button[type="submit"]:hover {
     background: #2980b9;
 }
 
-button[type="submit"]:disabled {
+button[type="submit"]:disabled,
+button.btn-disabled {
     background: #bdc3c7;
     cursor: not-allowed;
+    opacity: 0.7;
+}
+
+button[type="button"].btn-disabled {
+    width: 100%;
+    padding: 15px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-family: 'Crimson Text', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.coming-soon-note {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    color: #6c757d;
+    text-align: center;
+    font-style: italic;
+}
+
+.coming-soon-note a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.coming-soon-note a:hover {
+    text-decoration: underline;
 }
 
 /* Results Section */

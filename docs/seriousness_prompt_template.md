@@ -46,7 +46,7 @@ Each core dimension (**E**,**v**,**α**) is mapped to **[-1, 1]** where **-1 = d
    - Zero, or near to zero, if {entity} did no actions impact the internal order, and therefore scaling exponent, of the parts in {context} (eg, if a country, the parts are the citizen).
 
 ### 2) Substance Proportional for needed Activation Energy 
-- **Activation Energy (Ea) and sufficiency factor:** . Let `Ea_required` be the estimated minimum concentrated effort to reach the next stable point. Let `Ea_committed` be the verified, attributable effort toward that milestone, and so A_factor would be the percentage of resrouces to the required activation energy. For each of the three dimensions of seriousness, calculate:
+- **Activation Energy (Ea) and sufficiency factor:** . Let `Ea_required` be the estimated minimum concentrated effort to reach the next stable point (which might be the status quo). Let `Ea_committed` be the verified, attributable effort toward that milestone, and so A_factor would be the percentage of resrouces to the required activation energy. For each of the three dimensions of seriousness, calculate:
   - `A_factor = min( Ea_committed / Ea_required, 1.0 )` - do your best to estimate what the Ea_required would be in theory for each of the three dimensions.  Eg, a person highly credible in discovering resources may not be credible in impacting social order.
   - If the phenomenon being assessed has **already occurred or reached equilibrium**, then the “milestone” is defined as the *current realized state*, and all activation adjustment factors (`A_factor_E`, `A_factor_v`, `A_factor_alpha`) should default to `1.0`. In this mode, the model should **not invent a new milestone**.
 
