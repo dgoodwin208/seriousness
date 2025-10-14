@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Ideas Seriousness Analysis - IsXSerious.com</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .viz-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .viz-controls {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .toggle-btn {
+            padding: 12px 24px;
+            margin: 0 10px;
+            background: white;
+            border: 2px solid #3498db;
+            color: #3498db;
+            border-radius: 5px;
+            font-family: 'Crimson Text', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .toggle-btn:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        #plot-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 1rem;
+            min-height: 700px;
+            overflow: hidden;
+        }
+
+        .viz-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+        }
+
+        #rationale-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            max-height: 700px;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        #rationale-panel h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.3rem;
+        }
+
+        #rationale-panel .company-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #3498db;
+            margin-bottom: 0.5rem;
+        }
+
+        #rationale-panel .company-info {
+            font-size: 0.95rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        #rationale-panel .rationale-text {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #2c3e50;
+        }
+
+        #rationale-panel .placeholder {
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .projections-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .projection-item {
+            background: white;
+            width: 100%;
+        }
+
+        .stats-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #3498db;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+
+        .filter-controls {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .filter-controls select {
+            padding: 8px 16px;
+            margin: 0 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-family: 'Crimson Text', serif;
+            font-size: 1rem;
+            background: white;
+        }
+
+        @media (max-width: 1024px) {
+            .viz-layout {
+                grid-template-columns: 1fr;
+            }
+
+            #rationale-panel {
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-container">
+                <h1><a href="index.html">IsXSerious.com</a></h1>
+                <ul>
+                    <li><a href="essay.html">Essay</a></li>
+                    <li><a href="prompt.html">Prompt</a></li>
+                    <li><a href="sp500.html">S&P Demo</a></li>
+                    <li><a href="presidents.html">Presidents Demo</a></li>
+                    <li><a href="tech.html">Tech Demo</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Big Ideas Seriousness Analysis</h1>
+                <p class="subtitle">Thermodynamic evaluation of major technological and societal initiatives</p>
+            </div>
+        </section>
+
+        <section class="viz-container">
+            <div class="viz-controls">
+                <button class="toggle-btn active" id="btn-3d">3D View</button>
+                <button class="toggle-btn" id="btn-2d">2D Projections</button>
+            </div>
+
+            <div class="filter-controls">
+                <label for="designation-filter">Filter by Designation:</label>
+                <select id="designation-filter">
+                    <option value="all">All Designations</option>
+                    <option value="Serious">Serious</option>
+                    <option value="Anti-serious">Anti-serious</option>
+                    <option value="Unserious">Unserious</option>
+                    <option value="Serious (contested)">Serious (contested)</option>
+                </select>
+            </div>
+
+            <div class="viz-layout">
+                <div id="plot-container"></div>
+                <div id="rationale-panel">
+                    <h3>Idea Details</h3>
+                    <div class="placeholder">Click on an idea to pin details, or hover to preview</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-container">
+            <h2 style="text-align: center; margin-bottom: 1rem;">Dataset Statistics</h2>
+            <div class="stats-grid" id="stats-grid"></div>
+        </section>
+
+        <section class="about-section">
+            <div class="container">
+                <h2>About This Analysis</h2>
+                <p>This visualization shows the thermodynamic seriousness of major technological and societal initiatives across three dimensions:</p>
+
+                <div class="framework-explanation">
+                    <div class="parameter">
+                        <h3>E (Energy & Resources)</h3>
+                        <p>Does the initiative add net new resources (funding, power, materials) to the US system?</p>
+                    </div>
+                    <div class="parameter">
+                        <h3>v (Infrastructure & Efficiency)</h3>
+                        <p>Does the initiative build durable capacity and enhance resource utilization?</p>
+                    </div>
+                    <div class="parameter">
+                        <h3>α (Order & Coordination)</h3>
+                        <p>Does the initiative reduce disorder, inspire cooperation, or increase division?</p>
+                    </div>
+                </div>
+
+                <p style="margin-top: 2rem;">
+                    Toggle between 3D and 2D views to explore different perspectives of the data.
+                    Hover over any idea to see detailed information, or click to pin the details panel.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 IsXSerious.com - A project exploring the physics of cultural progress</p>
+        </div>
+    </footer>
+
+    <script>
+        let dataset = [];
+        let currentView = '3d';
+        let currentDesignationFilter = 'all';
+        let selectedIdea = null;
+
+        // Load CSV data
+        d3.csv('../data/big_ideas_seriousness.csv').then(function(data) {
+            dataset = data.map(d => ({
+                name: d.name,
+                E_adj: parseFloat(d.E_adj),
+                v_adj: parseFloat(d.v_adj),
+                alpha_adj: parseFloat(d.alpha_adj),
+                designation: d.designation,
+                rationale: d.rationale,
+                milestone: d.milestone,
+                magnitude: Math.sqrt(
+                    Math.pow(parseFloat(d.E_adj), 2) +
+                    Math.pow(parseFloat(d.v_adj), 2) +
+                    Math.pow(parseFloat(d.alpha_adj), 2)
+                )
+            }));
+
+            updateStats();
+            render3D();
+        });
+
+        function getFilteredData() {
+            return dataset.filter(d => {
+                const designationMatch = currentDesignationFilter === 'all' || d.designation === currentDesignationFilter;
+                return designationMatch;
+            });
+        }
+
+        function updateRationalePanel(idea, isPinned = false) {
+            const panel = document.getElementById('rationale-panel');
+            if (!idea) {
+                panel.innerHTML = `
+                    <h3>Idea Details</h3>
+                    <div class="placeholder">Click on an idea to pin details, or hover to preview</div>
+                `;
+                return;
+            }
+
+            const pinnedIndicator = isPinned ?
+                ' <span style="color: #6c757d; font-size: 0.9rem;">(Pinned - click another to change or <a href="#" id="unpin-link" style="color: #3498db; text-decoration: underline; cursor: pointer;">click here</a> to release)</span>' : '';
+
+            panel.innerHTML = `
+                <h3>Idea Details${pinnedIndicator}</h3>
+                <div class="company-name">${idea.name}</div>
+                <div class="company-info">
+                    <strong>Designation:</strong> ${idea.designation}
+                </div>
+                <div class="company-info">
+                    <strong>Dimensions:</strong><br>
+                    E (Resources): ${idea.E_adj.toFixed(2)}<br>
+                    v (Infrastructure): ${idea.v_adj.toFixed(2)}<br>
+                    α (Order): ${idea.alpha_adj.toFixed(2)}<br>
+                    Magnitude: ${idea.magnitude.toFixed(3)}
+                </div>
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">Milestone</h4>
+                <div class="rationale-text">${idea.milestone}</div>
+                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">Rationale</h4>
+                <div class="rationale-text">${idea.rationale}</div>
+            `;
+
+            // Add event listener for unpin link
+            if (isPinned) {
+                const unpinLink = document.getElementById('unpin-link');
+                if (unpinLink) {
+                    unpinLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        selectedIdea = null;
+                        updateRationalePanel(null);
+                    });
+                }
+            }
+        }
+
+        function render3D() {
+            const filteredData = getFilteredData();
+
+            // Clear the container completely
+            const container = document.getElementById('plot-container');
+            container.innerHTML = '';
+
+            const trace = {
+                x: filteredData.map(d => d.E_adj),
+                y: filteredData.map(d => d.v_adj),
+                z: filteredData.map(d => d.alpha_adj),
+                mode: 'markers',
+                type: 'scatter3d',
+                marker: {
+                    size: 12,  // Uniform size for ideas
+                    color: filteredData.map(d => d.magnitude),
+                    colorscale: 'Viridis',
+                    opacity: 0.8,
+                    line: {
+                        color: 'white',
+                        width: 0.5
+                    },
+                    showscale: false
+                },
+                text: filteredData.map(d =>
+                    `<b>${d.name}</b><br>` +
+                    `Designation: ${d.designation}<br>` +
+                    `E: ${d.E_adj.toFixed(2)}<br>` +
+                    `v: ${d.v_adj.toFixed(2)}<br>` +
+                    `α: ${d.alpha_adj.toFixed(2)}<br>` +
+                    `Magnitude: ${d.magnitude.toFixed(3)}`
+                ),
+                hoverinfo: 'text',
+                customdata: filteredData.map((d, i) => i),
+                showlegend: false
+            };
+
+            // Add transparent planes at zero
+            const planeRange = [-1, 1];
+            const planeGrid = [planeRange, planeRange];
+
+            // XY plane (z=0)
+            const xyPlane = {
+                type: 'surface',
+                x: planeGrid,
+                y: planeGrid,
+                z: [[0, 0], [0, 0]],
+                opacity: 0.15,
+                colorscale: [[0, 'lightgray'], [1, 'lightgray']],
+                showscale: false,
+                hoverinfo: 'skip'
+            };
+
+            // XZ plane (y=0)
+            const xzPlane = {
+                type: 'surface',
+                x: planeGrid,
+                y: [[0, 0], [0, 0]],
+                z: planeGrid,
+                opacity: 0.15,
+                colorscale: [[0, 'lightgray'], [1, 'lightgray']],
+                showscale: false,
+                hoverinfo: 'skip'
+            };
+
+            // YZ plane (x=0)
+            const yzPlane = {
+                type: 'surface',
+                x: [[0, 0], [0, 0]],
+                y: planeGrid,
+                z: planeGrid,
+                opacity: 0.15,
+                colorscale: [[0, 'lightgray'], [1, 'lightgray']],
+                showscale: false,
+                hoverinfo: 'skip'
+            };
+
+            // Add axis lines
+            const axisRange = [-1, 1];
+            const axisLines = [
+                {
+                    x: axisRange, y: [0, 0], z: [0, 0],
+                    mode: 'lines',
+                    type: 'scatter3d',
+                    line: { color: 'gray', width: 2 },
+                    showlegend: false,
+                    hoverinfo: 'skip'
+                },
+                {
+                    x: [0, 0], y: axisRange, z: [0, 0],
+                    mode: 'lines',
+                    type: 'scatter3d',
+                    line: { color: 'gray', width: 2 },
+                    showlegend: false,
+                    hoverinfo: 'skip'
+                },
+                {
+                    x: [0, 0], y: [0, 0], z: axisRange,
+                    mode: 'lines',
+                    type: 'scatter3d',
+                    line: { color: 'gray', width: 2 },
+                    showlegend: false,
+                    hoverinfo: 'skip'
+                }
+            ];
+
+            const layout = {
+                scene: {
+                    xaxis: { title: 'Resources (E)', range: [-1, 1] },
+                    yaxis: { title: 'Infrastructure (v)', range: [-1, 1] },
+                    zaxis: { title: 'Order (α)', range: [-1, 1] },
+                    bgcolor: 'white'
+                },
+                margin: { l: 0, r: 0, b: 0, t: 0 },
+                height: 700,
+                autosize: true,
+                paper_bgcolor: 'white',
+                plot_bgcolor: 'white'
+            };
+
+            Plotly.newPlot('plot-container', [xyPlane, xzPlane, yzPlane, trace, ...axisLines], layout, {responsive: true, displayModeBar: true})
+                .then(() => {
+                    // Re-attach event listeners after plot is created
+                    const plotDiv = document.getElementById('plot-container');
+
+                    plotDiv.on('plotly_click', function(data) {
+                        const pointIndex = data.points[0].customdata;
+                        if (pointIndex !== undefined) {
+                            selectedIdea = filteredData[pointIndex];
+                            updateRationalePanel(selectedIdea, true);
+                        }
+                    });
+
+                    plotDiv.on('plotly_hover', function(data) {
+                        if (!selectedIdea) {
+                            const pointIndex = data.points[0].customdata;
+                            if (pointIndex !== undefined) {
+                                updateRationalePanel(filteredData[pointIndex], false);
+                            }
+                        }
+                    });
+
+                    plotDiv.on('plotly_unhover', function() {
+                        if (!selectedIdea) {
+                            updateRationalePanel(null);
+                        }
+                    });
+
+                    // Show selected company if one was pinned
+                    if (selectedIdea) {
+                        updateRationalePanel(selectedIdea, true);
+                    }
+                });
+        }
+
+        function render2D() {
+            const filteredData = getFilteredData();
+
+            const createTrace = (x, y) => ({
+                x: filteredData.map(d => d[x]),
+                y: filteredData.map(d => d[y]),
+                mode: 'markers',
+                type: 'scatter',
+                marker: {
+                    size: 12,  // Uniform size for ideas
+                    color: filteredData.map(d => d.magnitude),
+                    colorscale: 'Viridis',
+                    opacity: 0.8,
+                    line: {
+                        color: 'white',
+                        width: 0.5
+                    }
+                },
+                text: filteredData.map(d =>
+                    `<b>${d.name}</b><br>` +
+                    `Designation: ${d.designation}`
+                ),
+                hoverinfo: 'text',
+                showlegend: false,
+                customdata: filteredData.map((d, i) => i)
+            });
+
+            const projections = [
+                { x: 'E_adj', y: 'v_adj', xlabel: 'Resources (E)', ylabel: 'Infrastructure (v)', title: 'Resources vs Infrastructure' },
+                { x: 'E_adj', y: 'alpha_adj', xlabel: 'Resources (E)', ylabel: 'Order (α)', title: 'Resources vs Order' },
+                { x: 'v_adj', y: 'alpha_adj', xlabel: 'Infrastructure (v)', ylabel: 'Order (α)', title: 'Infrastructure vs Order' }
+            ];
+
+            const container = document.getElementById('plot-container');
+            container.innerHTML = '<div class="projections-grid" id="projections-grid"></div>';
+            const grid = document.getElementById('projections-grid');
+
+            projections.forEach(proj => {
+                const div = document.createElement('div');
+                div.className = 'projection-item';
+                div.id = `proj-${proj.x}-${proj.y}`;
+                grid.appendChild(div);
+
+                const trace = createTrace(proj.x, proj.y);
+
+                const layout = {
+                    title: proj.title,
+                    xaxis: {
+                        title: proj.xlabel,
+                        range: [-1, 1],
+                        zeroline: true,
+                        zerolinewidth: 2,
+                        zerolinecolor: 'black',
+                        scaleanchor: 'y',
+                        scaleratio: 1
+                    },
+                    yaxis: {
+                        title: proj.ylabel,
+                        range: [-1, 1],
+                        zeroline: true,
+                        zerolinewidth: 2,
+                        zerolinecolor: 'black',
+                        constrain: 'domain'
+                    },
+                    width: 600,
+                    height: 600,
+                    margin: { l: 60, r: 20, b: 60, t: 40 },
+                    paper_bgcolor: 'white',
+                    plot_bgcolor: 'white'
+                };
+
+                Plotly.newPlot(div.id, [trace], layout, {responsive: false});
+
+                // Add click and hover event listeners to each 2D plot
+                const plotDiv = document.getElementById(div.id);
+
+                plotDiv.on('plotly_click', function(data) {
+                    const pointIndex = data.points[0].customdata;
+                    if (pointIndex !== undefined) {
+                        selectedIdea = filteredData[pointIndex];
+                        updateRationalePanel(selectedIdea, true);
+                    }
+                });
+
+                plotDiv.on('plotly_hover', function(data) {
+                    if (!selectedIdea) {
+                        const pointIndex = data.points[0].customdata;
+                        if (pointIndex !== undefined) {
+                            updateRationalePanel(filteredData[pointIndex], false);
+                        }
+                    }
+                });
+
+                plotDiv.on('plotly_unhover', function() {
+                    if (!selectedIdea) {
+                        updateRationalePanel(null);
+                    }
+                });
+            });
+
+            // Show selected company if one was pinned
+            if (selectedIdea) {
+                updateRationalePanel(selectedIdea, true);
+            }
+        }
+
+        function updateStats() {
+            const filteredData = getFilteredData();
+            const statsGrid = document.getElementById('stats-grid');
+
+            const stats = [
+                { label: 'Total Ideas', value: filteredData.length },
+                { label: 'Serious', value: filteredData.filter(d => d.designation === 'Serious').length },
+                { label: 'Anti-serious', value: filteredData.filter(d => d.designation === 'Anti-serious').length },
+                { label: 'Unserious', value: filteredData.filter(d => d.designation === 'Unserious').length },
+                { label: 'Avg Magnitude', value: (filteredData.reduce((sum, d) => sum + d.magnitude, 0) / filteredData.length).toFixed(3) }
+            ];
+
+            statsGrid.innerHTML = stats.map(stat => `
+                <div class="stat-card">
+                    <div class="stat-value">${stat.value}</div>
+                    <div class="stat-label">${stat.label}</div>
+                </div>
+            `).join('');
+        }
+
+        // Event listeners
+        document.getElementById('btn-3d').addEventListener('click', function() {
+            currentView = '3d';
+            document.getElementById('btn-3d').classList.add('active');
+            document.getElementById('btn-2d').classList.remove('active');
+            render3D();
+        });
+
+        document.getElementById('btn-2d').addEventListener('click', function() {
+            currentView = '2d';
+            document.getElementById('btn-2d').classList.add('active');
+            document.getElementById('btn-3d').classList.remove('active');
+            render2D();
+        });
+
+        document.getElementById('designation-filter').addEventListener('change', function(e) {
+            currentDesignationFilter = e.target.value;
+            updateStats();
+            if (currentView === '3d') {
+                render3D();
+            } else {
+                render2D();
+            }
+        });
+    </script>
+</body>
+</html>
