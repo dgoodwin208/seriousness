@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
     <style>
         .prompt-content {
             max-width: 900px;
@@ -134,7 +135,7 @@
         // Load and render the markdown prompt template
         async function loadPrompt() {
             try {
-                const response = await fetch('../docs/seriousness_prompt_template.md');
+                const response = await fetch('/docs/seriousness_prompt_template.md');
                 if (!response.ok) {
                     throw new Error('Failed to load prompt template');
                 }

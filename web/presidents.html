@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
     <style>
         .viz-container {
             max-width: 1400px;
@@ -276,7 +277,7 @@
         let selectedPresident = null;
 
         // Load CSV data
-        d3.csv('../data/US_presidents_seriousness.csv').then(function(data) {
+        d3.csv('/data/US_presidents_seriousness.csv').then(function(data) {
             dataset = data.map(d => ({
                 number: parseInt(d.number),
                 name: d.name,
