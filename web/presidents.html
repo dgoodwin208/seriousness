@@ -293,7 +293,7 @@
         let selectedPresident = null;
 
         // Load CSV data
-        d3.csv('/data/US_presidents_seriousness.csv').then(function(data) {
+        d3.csv('/data/us_presidents_seriousness.csv').then(function(data) {
             dataset = data.map(d => ({
                 number: parseInt(d.number),
                 name: d.name,
