@@ -1,0 +1,19 @@
+{
+  "versions": [
+    {
+      "version": "1.0",
+      "filename": "v1.0_base.md",
+      "date": "2025-01-15",
+      "description": "Base seriousness evaluation prompt with thermodynamic framework",
+      "changes": "Initial versioned release based on working prompt",
+      "is_current": true
+    }
+  ],
+  "version_history": {
+    "1.0": {
+      "compatible_models": ["claude-3-7-sonnet-20250219", "gpt-4o", "o1"],
+      "schema_version": "1.0",
+      "output_format": "json"
+    }
+  }
+}

@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Political Leaders Model Comparison - IsXSerious.com</title>
+    <meta name="description" content="Compare Claude and GPT-5 evaluations of political leaders' thermodynamic seriousness. See how different AI models assess political impact.">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://isxserious.com/politicians.html">
+    <meta property="og:title" content="Political Leaders Model Comparison - IsXSerious.com">
+    <meta property="og:description" content="Compare Claude and GPT-5 evaluations of political leaders' thermodynamic seriousness.">
+    <meta property="og:image" content="https://isxserious.com/preview_compressed.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://isxserious.com/politicians.html">
+    <meta property="twitter:title" content="Political Leaders Model Comparison - IsXSerious.com">
+    <meta property="twitter:description" content="Compare Claude and GPT-5 evaluations of political leaders' thermodynamic seriousness.">
+    <meta property="twitter:image" content="https://isxserious.com/preview_compressed.jpg">
+
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+    <style>
+        .viz-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .viz-controls {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .toggle-btn {
+            padding: 12px 24px;
+            margin: 0 10px;
+            background: white;
+            border: 2px solid #3498db;
+            color: #3498db;
+            border-radius: 5px;
+            font-family: 'Crimson Text', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .toggle-btn:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        #plot-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 1rem;
+            min-height: 700px;
+            overflow: hidden;
+        }
+
+        .viz-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+        }
+
+        .projections-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .projection-item {
+            background: white;
+            width: 100%;
+        }
+
+        #rationale-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            max-height: 700px;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        #rationale-panel h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.3rem;
+        }
+
+        #rationale-panel .leader-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #3498db;
+            margin-bottom: 0.5rem;
+        }
+
+        #rationale-panel .leader-info {
+            font-size: 0.95rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        #rationale-panel .model-comparison {
+            margin-top: 1.5rem;
+        }
+
+        #rationale-panel .model-section {
+            background: white;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        #rationale-panel .model-section h4 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        #rationale-panel .rationale-text {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #2c3e50;
+        }
+
+        #rationale-panel .placeholder {
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .stats-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #3498db;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+
+        .filter-controls {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .filter-controls select {
+            padding: 8px 16px;
+            margin: 0 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-family: 'Crimson Text', serif;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .legend {
+            text-align: center;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: inline-block;
+            margin: 0 15px;
+            font-size: 0.95rem;
+        }
+
+        .legend-marker {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        @media (max-width: 1024px) {
+            .viz-layout {
+                grid-template-columns: 1fr;
+            }
+
+            #rationale-panel {
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-container">
+                <h1><a href="index.html">IsXSerious.com</a></h1>
+                <ul>
+                    <li><a href="essay.html">Essay</a></li>
+                    <li><a href="prompt.html">Prompt</a></li>
+                    <li><a href="sp500.html">S&P Demo</a></li>
+                    <li><a href="presidents.html">Presidents Demo</a></li>
+                    <li><a href="politicians.html">Politicians Demo</a></li>
+                    <li><a href="tech.html">Tech Demo</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Political Leaders: Claude vs GPT-5</h1>
+                <p class="subtitle">Comparing AI model evaluations of political leadership seriousness</p>
+            </div>
+        </section>
+
+        <section class="viz-container">
+            <div class="viz-controls">
+                <button class="toggle-btn active" id="btn-3d">3D Comparison View</button>
+                <button class="toggle-btn" id="btn-2d">2D Projections</button>
+            </div>
+
+            <div class="filter-controls">
+                <label for="orientation-filter">Filter by Orientation:</label>
+                <select id="orientation-filter">
+                    <option value="all">All</option>
+                </select>
+
+                <label for="designation-filter">Filter by Designation:</label>
+                <select id="designation-filter">
+                    <option value="all">All Designations</option>
+                    <option value="Serious">Serious</option>
+                    <option value="Anti-serious">Anti-serious</option>
+                    <option value="Unserious">Unserious</option>
+                </select>
+
+                <label style="margin-left: 20px;">
+                    <input type="checkbox" id="show-claude" checked> Show Claude
+                </label>
+                <label style="margin-left: 10px;">
+                    <input type="checkbox" id="show-gpt5" checked> Show GPT-5
+                </label>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <span class="legend-marker" style="background: #DC143C;"></span>
+                    Conservative
+                </div>
+                <div class="legend-item">
+                    <span class="legend-marker" style="background: #4169E1;"></span>
+                    Progressive
+                </div>
+                <div class="legend-item">
+                    <span class="legend-marker" style="background: #808080;"></span>
+                    Other
+                </div>
+                <div class="legend-item">
+                    <span class="legend-marker" style="background: white; border: 3px solid #f39c12;"></span>
+                    Claude Border (Orange)
+                </div>
+                <div class="legend-item">
+                    <span class="legend-marker" style="background: white; border: 3px solid #9b59b6;"></span>
+                    GPT-5 Border (Purple)
+                </div>
+                <div class="legend-item">
+                    <span style="display: inline-block; width: 30px; height: 2px; background: black; vertical-align: middle; margin-right: 5px;"></span>
+                    Model Disagreement
+                </div>
+            </div>
+
+            <div class="viz-layout">
+                <div id="plot-container">Loading data...</div>
+                <div id="rationale-panel">
+                    <h3>Leader Details</h3>
+                    <div class="placeholder">Click on a leader to compare model evaluations</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-container">
+            <h2 style="text-align: center; margin-bottom: 1rem;">Model Agreement Statistics</h2>
+            <div class="stats-grid" id="stats-grid"></div>
+        </section>
+
+        <section class="about-section">
+            <div class="container">
+                <h2>About This Analysis</h2>
+                <p>This visualization compares how two different AI models—Claude 3.7 Sonnet and GPT-5—evaluate the same political leaders across three dimensions of thermodynamic seriousness:</p>
+
+                <div class="framework-explanation">
+                    <div class="parameter">
+                        <h3>E (Energy & Resources)</h3>
+                        <p>Did the leader add net new resources to the system?</p>
+                    </div>
+                    <div class="parameter">
+                        <h3>v (Infrastructure & Efficiency)</h3>
+                        <p>Did they build durable capacity and enhance resource utilization?</p>
+                    </div>
+                    <div class="parameter">
+                        <h3>α (Order & Coordination)</h3>
+                        <p>Did they reduce disorder and inspire cooperation, or increase division?</p>
+                    </div>
+                </div>
+
+                <p style="margin-top: 2rem;">
+                    <strong>Red markers</strong> show Claude's evaluations, <strong>blue markers</strong> show GPT-5's evaluations.
+                    Black lines connect the two evaluations for each leader, showing areas of agreement and disagreement between the models.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 IsXSerious.com - A project exploring the physics of cultural progress</p>
+        </div>
+    </footer>
+
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://ausdneaevmkubvsygwdo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1c2RuZWFldm1rdWJ2c3lnd2RvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1NDMyNDAsImV4cCI6MjA3NjExOTI0MH0.H5_XhCEqzr4IxqQxue9-tWPYOMNf6kpJc05yKHdacHs';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let dataset = [];
+        let currentView = '3d';
+        let currentOrientationFilter = 'all';
+        let currentDesignationFilter = 'all';
+        let selectedLeader = null;
+        let showClaude = true;
+        let showGPT5 = true;
+
+        // Load data from Supabase
+        async function loadData() {
+            try {
+                // Get all evaluations with target metadata
+                // Filter by 'politician' in the categories array
+                const { data: evaluations, error } = await supabase
+                    .from('evaluations')
+                    .select(`
+                        *,
+                        evaluation_targets!inner (
+                            name,
+                            metadata
+                        )
+                    `)
+                    .eq('context', 'United States')
+                    .eq('prompt_version', '1.0')
+                    .in('model', ['claude-3-7-sonnet-20250219', 'gpt-5'])
+                    .contains('evaluation_targets.metadata', { categories: ['politician'] });
+
+                if (error) throw error;
+
+                // Group by target
+                const grouped = {};
+                evaluations.forEach(eval => {
+                    const name = eval.evaluation_targets.name;
+                    const model = eval.model === 'claude-3-7-sonnet-20250219' ? 'claude' : 'gpt5';
+
+                    if (!grouped[name]) {
+                        grouped[name] = {
+                            name: name,
+                            metadata: eval.evaluation_targets.metadata,
+                            claude: null,
+                            gpt5: null
+                        };
+                    }
+
+                    grouped[name][model] = {
+                        e_adj: eval.e_adj,
+                        v_adj: eval.v_adj,
+                        alpha_adj: eval.alpha_adj,
+                        designation: eval.designation,
+                        rationale: eval.rationale,
+                        milestone: eval.milestone
+                    };
+                });
+
+                // Filter to only leaders with both evaluations
+                dataset = Object.values(grouped).filter(d => d.claude && d.gpt5);
+
+                // Populate filters
+                const orientations = [...new Set(dataset.map(d => d.metadata?.orientation).filter(Boolean))].sort();
+                const orientationFilter = document.getElementById('orientation-filter');
+                orientations.forEach(orientation => {
+                    const option = document.createElement('option');
+                    option.value = orientation;
+                    option.textContent = orientation;
+                    orientationFilter.appendChild(option);
+                });
+
+                updateStats();
+                render3D();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('plot-container').innerHTML =
+                    `<div style="padding: 2rem; text-align: center; color: #e74c3c;">
+                        Error loading data: ${error.message}
+                    </div>`;
+            }
+        }
+
+        function getFilteredData() {
+            return dataset.filter(d => {
+                const orientationMatch = currentOrientationFilter === 'all' ||
+                    d.metadata?.orientation === currentOrientationFilter;
+                const designationMatch = currentDesignationFilter === 'all' ||
+                    d.claude?.designation === currentDesignationFilter ||
+                    d.gpt5?.designation === currentDesignationFilter;
+                return orientationMatch && designationMatch;
+            });
+        }
+
+        function getOrientationColor(orientation) {
+            if (orientation === 'Conservative') return '#DC143C';  // Crimson red
+            if (orientation === 'Progressive') return '#4169E1';  // Royal blue
+            return '#808080';  // Gray for others
+        }
+
+        function updateRationalePanel(leader, isPinned = false) {
+            const panel = document.getElementById('rationale-panel');
+            if (!leader) {
+                panel.innerHTML = `
+                    <h3>Leader Details</h3>
+                    <div class="placeholder">Click on a leader to compare model evaluations</div>
+                `;
+                return;
+            }
+
+            const pinnedIndicator = isPinned ?
+                ' <span style="color: #6c757d; font-size: 0.9rem;">(Pinned)</span>' : '';
+
+            const distance = Math.sqrt(
+                Math.pow(leader.claude.e_adj - leader.gpt5.e_adj, 2) +
+                Math.pow(leader.claude.v_adj - leader.gpt5.v_adj, 2) +
+                Math.pow(leader.claude.alpha_adj - leader.gpt5.alpha_adj, 2)
+            );
+
+            panel.innerHTML = `
+                <h3>Leader Comparison${pinnedIndicator}</h3>
+                <div class="leader-name">${leader.name}</div>
+                <div class="leader-info">
+                    <strong>Orientation:</strong> ${leader.metadata?.orientation || 'N/A'}<br>
+                    <strong>Model Agreement Distance:</strong> ${distance.toFixed(3)}
+                </div>
+
+                <div class="model-comparison">
+                    <div class="model-section" style="border-left-color: #e74c3c;">
+                        <h4>Claude 3.7 Sonnet</h4>
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>Designation:</strong> ${leader.claude.designation}<br>
+                            <strong>E:</strong> ${leader.claude.e_adj?.toFixed(2)},
+                            <strong>v:</strong> ${leader.claude.v_adj?.toFixed(2)},
+                            <strong>α:</strong> ${leader.claude.alpha_adj?.toFixed(2)}
+                        </div>
+                        <div class="rationale-text" style="font-size: 0.95rem;">
+                            ${leader.claude.rationale || 'No rationale provided'}
+                        </div>
+                    </div>
+
+                    <div class="model-section" style="border-left-color: #3498db;">
+                        <h4>GPT-5</h4>
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>Designation:</strong> ${leader.gpt5.designation}<br>
+                            <strong>E:</strong> ${leader.gpt5.e_adj?.toFixed(2)},
+                            <strong>v:</strong> ${leader.gpt5.v_adj?.toFixed(2)},
+                            <strong>α:</strong> ${leader.gpt5.alpha_adj?.toFixed(2)}
+                        </div>
+                        <div class="rationale-text" style="font-size: 0.95rem;">
+                            ${leader.gpt5.rationale || 'No rationale provided'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function render3D() {
+            const filteredData = getFilteredData();
+            const container = document.getElementById('plot-container');
+            container.innerHTML = '';
+
+            // Create traces for Claude evaluations (colored by orientation)
+            const claudeTrace = {
+                x: filteredData.map(d => d.claude.e_adj),
+                y: filteredData.map(d => d.claude.v_adj),
+                z: filteredData.map(d => d.claude.alpha_adj),
+                mode: 'markers',
+                type: 'scatter3d',
+                name: 'Claude',
+                visible: showClaude,
+                marker: {
+                    size: 10,
+                    color: filteredData.map(d => getOrientationColor(d.metadata?.orientation)),
+                    opacity: 0.9,
+                    line: {
+                        color: '#f39c12',  // Orange border for Claude
+                        width: 3
+                    }
+                },
+                text: filteredData.map(d =>
+                    `<b>${d.name}</b><br>` +
+                    `Orientation: ${d.metadata?.orientation || 'N/A'}<br>` +
+                    `Model: Claude 3.7<br>` +
+                    `Designation: ${d.claude.designation}<br>` +
+                    `E: ${d.claude.e_adj?.toFixed(2)}<br>` +
+                    `v: ${d.claude.v_adj?.toFixed(2)}<br>` +
+                    `α: ${d.claude.alpha_adj?.toFixed(2)}`
+                ),
+                hoverinfo: 'text',
+                customdata: filteredData.map((d, i) => ({index: i, model: 'claude'})),
+                showlegend: false
+            };
+
+            // Create traces for GPT-5 evaluations (colored by orientation)
+            const gpt5Trace = {
+                x: filteredData.map(d => d.gpt5.e_adj),
+                y: filteredData.map(d => d.gpt5.v_adj),
+                z: filteredData.map(d => d.gpt5.alpha_adj),
+                mode: 'markers',
+                type: 'scatter3d',
+                name: 'GPT-5',
+                visible: showGPT5,
+                marker: {
+                    size: 10,
+                    color: filteredData.map(d => getOrientationColor(d.metadata?.orientation)),
+                    opacity: 0.9,
+                    line: {
+                        color: '#9b59b6',  // Purple border for GPT-5
+                        width: 3
+                    }
+                },
+                text: filteredData.map(d =>
+                    `<b>${d.name}</b><br>` +
+                    `Orientation: ${d.metadata?.orientation || 'N/A'}<br>` +
+                    `Model: GPT-5<br>` +
+                    `Designation: ${d.gpt5.designation}<br>` +
+                    `E: ${d.gpt5.e_adj?.toFixed(2)}<br>` +
+                    `v: ${d.gpt5.v_adj?.toFixed(2)}<br>` +
+                    `α: ${d.gpt5.alpha_adj?.toFixed(2)}`
+                ),
+                hoverinfo: 'text',
+                customdata: filteredData.map((d, i) => ({index: i, model: 'gpt5'})),
+                showlegend: false
+            };
+
+            // Create connecting lines between model evaluations
+            const lineTraces = filteredData.map(d => ({
+                x: [d.claude.e_adj, d.gpt5.e_adj],
+                y: [d.claude.v_adj, d.gpt5.v_adj],
+                z: [d.claude.alpha_adj, d.gpt5.alpha_adj],
+                mode: 'lines',
+                type: 'scatter3d',
+                line: {
+                    color: 'black',
+                    width: 2
+                },
+                hoverinfo: 'skip',
+                showlegend: false
+            }));
+
+            // Create arrowheads pointing from Claude → GPT-5
+            const arrowTraces = filteredData.map(d => {
+                // Calculate direction vector
+                const dx = d.gpt5.e_adj - d.claude.e_adj;
+                const dy = d.gpt5.v_adj - d.claude.v_adj;
+                const dz = d.gpt5.alpha_adj - d.claude.alpha_adj;
+                const magnitude = Math.sqrt(dx*dx + dy*dy + dz*dz);
+
+                // Normalize and scale to arrow size
+                const arrowSize = 0.03;
+                const u = magnitude > 0 ? dx / magnitude : 0;
+                const v = magnitude > 0 ? dy / magnitude : 0;
+                const w = magnitude > 0 ? dz / magnitude : 0;
+
+                return {
+                    type: 'cone',
+                    x: [d.gpt5.e_adj],
+                    y: [d.gpt5.v_adj],
+                    z: [d.gpt5.alpha_adj],
+                    u: [u],
+                    v: [v],
+                    w: [w],
+                    colorscale: [[0, 'black'], [1, 'black']],
+                    sizemode: 'absolute',
+                    sizeref: arrowSize,
+                    showscale: false,
+                    hoverinfo: 'skip',
+                    showlegend: false
+                };
+            });
+
+            // Add reference planes
+            const planeRange = [-1, 1];
+            const planeGrid = [planeRange, planeRange];
+
+            const xyPlane = {
+                type: 'surface',
+                x: planeGrid,
+                y: planeGrid,
+                z: [[0, 0], [0, 0]],
+                opacity: 0.1,
+                colorscale: [[0, 'lightgray'], [1, 'lightgray']],
+                showscale: false,
+                hoverinfo: 'skip'
+            };
+
+            const xzPlane = {
+                type: 'surface',
+                x: planeGrid,
+                y: [[0, 0], [0, 0]],
+                z: planeGrid,
+                opacity: 0.1,
+                colorscale: [[0, 'lightgray'], [1, 'lightgray']],
+                showscale: false,
+                hoverinfo: 'skip'
+            };
+
+            const yzPlane = {
+                type: 'surface',
+                x: [[0, 0], [0, 0]],
+                y: planeGrid,
+                z: planeGrid,
+                opacity: 0.1,
+                colorscale: [[0, 'lightgray'], [1, 'lightgray']],
+                showscale: false,
+                hoverinfo: 'skip'
+            };
+
+            const layout = {
+                scene: {
+                    xaxis: { title: 'Resources (E)', range: [-1, 1] },
+                    yaxis: { title: 'Infrastructure (v)', range: [-1, 1] },
+                    zaxis: { title: 'Order (α)', range: [-1, 1] },
+                    bgcolor: 'white'
+                },
+                margin: { l: 0, r: 0, b: 0, t: 0 },
+                height: 700,
+                autosize: true,
+                paper_bgcolor: 'white',
+                plot_bgcolor: 'white'
+            };
+
+            const traces = [xyPlane, xzPlane, yzPlane, ...lineTraces, ...arrowTraces, claudeTrace, gpt5Trace];
+
+            Plotly.newPlot('plot-container', traces, layout, {responsive: true, displayModeBar: true})
+                .then(() => {
+                    const plotDiv = document.getElementById('plot-container');
+
+                    plotDiv.on('plotly_click', function(data) {
+                        const customdata = data.points[0].customdata;
+                        if (customdata && customdata.index !== undefined) {
+                            selectedLeader = filteredData[customdata.index];
+                            updateRationalePanel(selectedLeader, true);
+                        }
+                    });
+
+                    plotDiv.on('plotly_hover', function(data) {
+                        if (!selectedLeader) {
+                            const customdata = data.points[0].customdata;
+                            if (customdata && customdata.index !== undefined) {
+                                updateRationalePanel(filteredData[customdata.index], false);
+                            }
+                        }
+                    });
+
+                    plotDiv.on('plotly_unhover', function() {
+                        if (!selectedLeader) {
+                            updateRationalePanel(null);
+                        }
+                    });
+
+                    if (selectedLeader) {
+                        updateRationalePanel(selectedLeader, true);
+                    }
+                });
+        }
+
+        function render2D() {
+            const filteredData = getFilteredData();
+            const container = document.getElementById('plot-container');
+            container.innerHTML = '<div class="projections-grid" id="projections-grid"></div>';
+            const grid = document.getElementById('projections-grid');
+
+            const createTrace = (modelData, modelName, borderColor) => (x, y) => ({
+                x: modelData.map(d => d[x]),
+                y: modelData.map(d => d[y]),
+                mode: 'markers',
+                type: 'scatter',
+                name: modelName,
+                marker: {
+                    size: 10,
+                    color: modelData.map(d => getOrientationColor(d.metadata?.orientation)),
+                    opacity: 0.9,
+                    line: {
+                        color: borderColor,
+                        width: 3
+                    }
+                },
+                text: modelData.map(d =>
+                    `<b>${d.name}</b><br>` +
+                    `Orientation: ${d.metadata?.orientation || 'N/A'}<br>` +
+                    `Model: ${modelName}<br>` +
+                    `Designation: ${d.designation}<br>` +
+                    `E: ${d.e_adj?.toFixed(2)}<br>` +
+                    `v: ${d.v_adj?.toFixed(2)}<br>` +
+                    `α: ${d.alpha_adj?.toFixed(2)}`
+                ),
+                hoverinfo: 'text',
+                showlegend: false,
+                customdata: modelData.map((d, i) => ({index: i, model: modelName.toLowerCase().replace(/[^a-z0-9]/g, '')}))
+            });
+
+            const projections = [
+                { x: 'e_adj', y: 'v_adj', xlabel: 'Resources (E)', ylabel: 'Infrastructure (v)', title: 'Resources vs Infrastructure' },
+                { x: 'e_adj', y: 'alpha_adj', xlabel: 'Resources (E)', ylabel: 'Order (α)', title: 'Resources vs Order' },
+                { x: 'v_adj', y: 'alpha_adj', xlabel: 'Infrastructure (v)', ylabel: 'Order (α)', title: 'Infrastructure vs Order' }
+            ];
+
+            projections.forEach(proj => {
+                const div = document.createElement('div');
+                div.className = 'projection-item';
+                div.id = `proj-${proj.x}-${proj.y}`;
+                grid.appendChild(div);
+
+                const traces = [];
+
+                // Create Claude data
+                const claudeData = filteredData.map(d => ({
+                    name: d.name,
+                    metadata: d.metadata,
+                    designation: d.claude.designation,
+                    e_adj: d.claude.e_adj,
+                    v_adj: d.claude.v_adj,
+                    alpha_adj: d.claude.alpha_adj
+                }));
+
+                // Create GPT-5 data
+                const gpt5Data = filteredData.map(d => ({
+                    name: d.name,
+                    metadata: d.metadata,
+                    designation: d.gpt5.designation,
+                    e_adj: d.gpt5.e_adj,
+                    v_adj: d.gpt5.v_adj,
+                    alpha_adj: d.gpt5.alpha_adj
+                }));
+
+                // Add connecting lines with arrows
+                filteredData.forEach(d => {
+                    const x1 = d.claude[proj.x];
+                    const y1 = d.claude[proj.y];
+                    const x2 = d.gpt5[proj.x];
+                    const y2 = d.gpt5[proj.y];
+
+                    traces.push({
+                        x: [x1, x2],
+                        y: [y1, y2],
+                        mode: 'lines',
+                        type: 'scatter',
+                        line: {
+                            color: 'black',
+                            width: 2
+                        },
+                        hoverinfo: 'skip',
+                        showlegend: false
+                    });
+
+                    // Add arrowhead annotation
+                    const dx = x2 - x1;
+                    const dy = y2 - y1;
+                    const magnitude = Math.sqrt(dx * dx + dy * dy);
+
+                    if (magnitude > 0.01) {  // Only add arrow if points are not too close
+                        // Calculate arrow position (90% along the line)
+                        const arrowX = x1 + 0.9 * dx;
+                        const arrowY = y1 + 0.9 * dy;
+
+                        traces.push({
+                            x: [arrowX],
+                            y: [arrowY],
+                            mode: 'markers',
+                            type: 'scatter',
+                            marker: {
+                                symbol: 'triangle-up',
+                                size: 8,
+                                color: 'black',
+                                angle: Math.atan2(dy, dx) * 180 / Math.PI
+                            },
+                            hoverinfo: 'skip',
+                            showlegend: false
+                        });
+                    }
+                });
+
+                // Add model traces
+                if (showClaude) {
+                    traces.push(createTrace(claudeData, 'Claude', '#f39c12')(proj.x, proj.y));
+                }
+                if (showGPT5) {
+                    traces.push(createTrace(gpt5Data, 'GPT-5', '#9b59b6')(proj.x, proj.y));
+                }
+
+                const layout = {
+                    title: proj.title,
+                    xaxis: {
+                        title: proj.xlabel,
+                        range: [-1, 1],
+                        zeroline: true,
+                        zerolinewidth: 2,
+                        zerolinecolor: 'black',
+                        scaleanchor: 'y',
+                        scaleratio: 1
+                    },
+                    yaxis: {
+                        title: proj.ylabel,
+                        range: [-1, 1],
+                        zeroline: true,
+                        zerolinewidth: 2,
+                        zerolinecolor: 'black',
+                        constrain: 'domain'
+                    },
+                    width: 600,
+                    height: 600,
+                    margin: { l: 60, r: 20, b: 60, t: 40 },
+                    paper_bgcolor: 'white',
+                    plot_bgcolor: 'white'
+                };
+
+                Plotly.newPlot(div.id, traces, layout, {responsive: false});
+
+                // Add click and hover event listeners
+                const plotDiv = document.getElementById(div.id);
+
+                plotDiv.on('plotly_click', function(data) {
+                    const customdata = data.points[0].customdata;
+                    if (customdata && customdata.index !== undefined) {
+                        selectedLeader = filteredData[customdata.index];
+                        updateRationalePanel(selectedLeader, true);
+                    }
+                });
+
+                plotDiv.on('plotly_hover', function(data) {
+                    if (!selectedLeader) {
+                        const customdata = data.points[0].customdata;
+                        if (customdata && customdata.index !== undefined) {
+                            updateRationalePanel(filteredData[customdata.index], false);
+                        }
+                    }
+                });
+
+                plotDiv.on('plotly_unhover', function() {
+                    if (!selectedLeader) {
+                        updateRationalePanel(null);
+                    }
+                });
+            });
+
+            // Show selected leader if one was pinned
+            if (selectedLeader) {
+                updateRationalePanel(selectedLeader, true);
+            }
+        }
+
+        function updateStats() {
+            const filteredData = getFilteredData();
+            const statsGrid = document.getElementById('stats-grid');
+
+            // Calculate agreement metrics
+            const designationAgreement = filteredData.filter(d =>
+                d.claude.designation === d.gpt5.designation
+            ).length;
+
+            const avgDistance = filteredData.reduce((sum, d) => {
+                return sum + Math.sqrt(
+                    Math.pow(d.claude.e_adj - d.gpt5.e_adj, 2) +
+                    Math.pow(d.claude.v_adj - d.gpt5.v_adj, 2) +
+                    Math.pow(d.claude.alpha_adj - d.gpt5.alpha_adj, 2)
+                );
+            }, 0) / filteredData.length;
+
+            const stats = [
+                { label: 'Total Leaders', value: filteredData.length },
+                { label: 'Designation Agreement', value: `${designationAgreement} (${(100 * designationAgreement / filteredData.length).toFixed(0)}%)` },
+                { label: 'Avg 3D Distance', value: avgDistance.toFixed(3) },
+                { label: 'Claude Serious', value: filteredData.filter(d => d.claude.designation === 'Serious').length },
+                { label: 'GPT-5 Serious', value: filteredData.filter(d => d.gpt5.designation === 'Serious').length }
+            ];
+
+            statsGrid.innerHTML = stats.map(stat => `
+                <div class="stat-card">
+                    <div class="stat-value">${stat.value}</div>
+                    <div class="stat-label">${stat.label}</div>
+                </div>
+            `).join('');
+        }
+
+        // Event listeners
+        document.getElementById('btn-3d').addEventListener('click', function() {
+            currentView = '3d';
+            document.getElementById('btn-3d').classList.add('active');
+            document.getElementById('btn-2d').classList.remove('active');
+            render3D();
+        });
+
+        document.getElementById('btn-2d').addEventListener('click', function() {
+            currentView = '2d';
+            document.getElementById('btn-2d').classList.add('active');
+            document.getElementById('btn-3d').classList.remove('active');
+            render2D();
+        });
+
+        document.getElementById('orientation-filter').addEventListener('change', function(e) {
+            currentOrientationFilter = e.target.value;
+            updateStats();
+            if (currentView === '3d') {
+                render3D();
+            } else {
+                render2D();
+            }
+        });
+
+        document.getElementById('designation-filter').addEventListener('change', function(e) {
+            currentDesignationFilter = e.target.value;
+            updateStats();
+            if (currentView === '3d') {
+                render3D();
+            } else {
+                render2D();
+            }
+        });
+
+        document.getElementById('show-claude').addEventListener('change', function(e) {
+            showClaude = e.target.checked;
+            if (currentView === '3d') {
+                render3D();
+            } else {
+                render2D();
+            }
+        });
+
+        document.getElementById('show-gpt5').addEventListener('change', function(e) {
+            showGPT5 = e.target.checked;
+            if (currentView === '3d') {
+                render3D();
+            } else {
+                render2D();
+            }
+        });
+
+        // Load data on page load
+        loadData();
+    </script>
+</body>
+</html>

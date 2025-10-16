@@ -116,6 +116,7 @@
                     <li><a href="prompt.html">Prompt</a></li>
                     <li><a href="sp500.html">S&P Demo</a></li>
                     <li><a href="presidents.html">Presidents Demo</a></li>
+                    <li><a href="politicians.html">GPT/Claude Demo</a></li>
                     <li><a href="tech.html">Tech Demo</a></li>
                 </ul>
             </div>
@@ -151,7 +152,7 @@
         // Load and render the markdown prompt template
         async function loadPrompt() {
             try {
-                const response = await fetch('/docs/seriousness_prompt_template.md');
+                const response = await fetch('/prompts/v1.0_base.md');
                 if (!response.ok) {
                     throw new Error('Failed to load prompt template');
                 }

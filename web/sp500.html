@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
     <style>
         .viz-container {
@@ -201,6 +201,7 @@
                     <li><a href="prompt.html">Prompt</a></li>
                     <li><a href="sp500.html">S&P Demo</a></li>
                     <li><a href="presidents.html">Presidents Demo</a></li>
+                    <li><a href="politicians.html">GPT/Claude Demo</a></li>
                     <li><a href="tech.html">Tech Demo</a></li>
                 </ul>
             </div>
@@ -287,46 +288,82 @@
     </footer>
 
     <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://ausdneaevmkubvsygwdo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1c2RuZWFldm1rdWJ2c3lnd2RvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1NDMyNDAsImV4cCI6MjA3NjExOTI0MH0.H5_XhCEqzr4IxqQxue9-tWPYOMNf6kpJc05yKHdacHs';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         let dataset = [];
         let currentView = '3d';
         let currentSectorFilter = 'all';
         let currentDesignationFilter = 'all';
         let selectedCompany = null;
 
-        // Load CSV data
-        d3.csv('/data/SP500_seriousness.csv').then(function(data) {
-            dataset = data.map(d => ({
-                symbol: d.Symbol,
-                security: d.Security,
-                sector: d['GICS Sector'],
-                subIndustry: d['GICS Sub-Industry'],
-                headquarters: d['Headquarters Location'],
-                weight: parseFloat(d.Weight.replace('%', '')),
-                E_adj: parseFloat(d.E_adj),
-                v_adj: parseFloat(d.v_adj),
-                alpha_adj: parseFloat(d.alpha_adj),
-                designation: d.designation,
-                rationale: d.rationale,
-                magnitude: Math.sqrt(
-                    Math.pow(parseFloat(d.E_adj), 2) +
-                    Math.pow(parseFloat(d.v_adj), 2) +
-                    Math.pow(parseFloat(d.alpha_adj), 2)
-                )
-            }));
+        // Load data from Supabase
+        async function loadData() {
+            try {
+                // Get all S&P 500 evaluations from Supabase
+                // Filter by 'sp500' in the categories array
+                const { data: evaluations, error } = await supabase
+                    .from('evaluations')
+                    .select(`
+                        *,
+                        evaluation_targets!inner (
+                            name,
+                            metadata
+                        )
+                    `)
+                    .eq('context', 'United States')
+                    .eq('model', 'claude-3-7-sonnet-20250219')
+                    .eq('prompt_version', '1.0')
+                    .contains('evaluation_targets.metadata', { categories: ['sp500'] });
 
-            // Populate sector filter
-            const sectors = [...new Set(dataset.map(d => d.sector))].sort();
-            const sectorFilter = document.getElementById('sector-filter');
-            sectors.forEach(sector => {
-                const option = document.createElement('option');
-                option.value = sector;
-                option.textContent = sector;
-                sectorFilter.appendChild(option);
-            });
+                if (error) throw error;
 
-            updateStats();
-            render3D();
-        });
+                // Transform data to match expected format
+                dataset = evaluations.map(d => ({
+                    symbol: d.evaluation_targets.metadata?.Symbol || '',
+                    security: d.evaluation_targets.name,
+                    sector: d.evaluation_targets.metadata?.['GICS Sector'] || 'Unknown',
+                    subIndustry: d.evaluation_targets.metadata?.['GICS Sub-Industry'] || '',
+                    headquarters: d.evaluation_targets.metadata?.['Headquarters Location'] || '',
+                    weight: parseFloat(d.evaluation_targets.metadata?.Weight?.replace('%', '') || 0),
+                    E_adj: d.e_adj,
+                    v_adj: d.v_adj,
+                    alpha_adj: d.alpha_adj,
+                    designation: d.designation,
+                    rationale: d.rationale,
+                    magnitude: Math.sqrt(
+                        Math.pow(d.e_adj, 2) +
+                        Math.pow(d.v_adj, 2) +
+                        Math.pow(d.alpha_adj, 2)
+                    )
+                }));
+
+                // Populate sector filter
+                const sectors = [...new Set(dataset.map(d => d.sector))].sort();
+                const sectorFilter = document.getElementById('sector-filter');
+                sectors.forEach(sector => {
+                    const option = document.createElement('option');
+                    option.value = sector;
+                    option.textContent = sector;
+                    sectorFilter.appendChild(option);
+                });
+
+                updateStats();
+                render3D();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('plot-container').innerHTML =
+                    `<div style="padding: 2rem; text-align: center; color: #e74c3c;">
+                        Error loading data: ${error.message}
+                    </div>`;
+            }
+        }
+
+        // Load data on page load
+        loadData();
 
         function getFilteredData() {
             return dataset.filter(d => {
