@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Big Ideas Seriousness Analysis - IsXSerious.com</title>
-    <meta name="description" content="Interactive 3D visualization of the thermodynamic seriousness of major technological and societal initiatives. Explore how big ideas contribute to civilizational progress.">
+    <title>CSI 300 Seriousness Analysis - IsXSerious.com</title>
+    <meta name="description" content="Interactive 3D visualization of the thermodynamic seriousness of CSI 300 companies. Explore how China's largest companies contribute to or detract from systemic order.">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://isxserious.com/tech.html">
-    <meta property="og:title" content="Big Ideas Seriousness Analysis - IsXSerious.com">
-    <meta property="og:description" content="Interactive 3D visualization of the thermodynamic seriousness of major technological and societal initiatives. Explore how big ideas contribute to civilizational progress.">
+    <meta property="og:url" content="https://isxserious.com/csi300.html">
+    <meta property="og:title" content="CSI 300 Seriousness Analysis - IsXSerious.com">
+    <meta property="og:description" content="Interactive 3D visualization of the thermodynamic seriousness of CSI 300 companies. Explore how China's largest companies contribute to or detract from systemic order.">
     <meta property="og:image" content="https://isxserious.com/preview_compressed.jpg">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://isxserious.com/tech.html">
-    <meta property="twitter:title" content="Big Ideas Seriousness Analysis - IsXSerious.com">
-    <meta property="twitter:description" content="Interactive 3D visualization of the thermodynamic seriousness of major technological and societal initiatives. Explore how big ideas contribute to civilizational progress.">
+    <meta property="twitter:url" content="https://isxserious.com/csi300.html">
+    <meta property="twitter:title" content="CSI 300 Seriousness Analysis - IsXSerious.com">
+    <meta property="twitter:description" content="Interactive 3D visualization of the thermodynamic seriousness of CSI 300 companies. Explore how China's largest companies contribute to or detract from systemic order.">
     <meta property="twitter:image" content="https://isxserious.com/preview_compressed.jpg">
 
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
     <style>
         .viz-container {
@@ -200,8 +200,8 @@
     <main>
         <section class="hero">
             <div class="container">
-                <h1>Big Ideas Seriousness Analysis</h1>
-                <p class="subtitle">Thermodynamic evaluation of major technological and societal initiatives</p>
+                <h1>CSI 300 Seriousness Analysis</h1>
+                <p class="subtitle">Thermodynamic evaluation of China's largest companies</p>
             </div>
         </section>
 
@@ -212,6 +212,11 @@
             </div>
 
             <div class="filter-controls">
+                <label for="sector-filter">Filter by Sector:</label>
+                <select id="sector-filter">
+                    <option value="all">All Sectors</option>
+                </select>
+
                 <label for="designation-filter">Filter by Designation:</label>
                 <select id="designation-filter">
                     <option value="all">All Designations</option>
@@ -225,8 +230,8 @@
             <div class="viz-layout">
                 <div id="plot-container"></div>
                 <div id="rationale-panel">
-                    <h3>Idea Details</h3>
-                    <div class="placeholder">Click on an idea to pin details, or hover to preview</div>
+                    <h3>Company Details</h3>
+                    <div class="placeholder">Hover over a company to see details</div>
                 </div>
             </div>
         </section>
@@ -239,26 +244,27 @@
         <section class="about-section">
             <div class="container">
                 <h2>About This Analysis</h2>
-                <p>This visualization shows the thermodynamic seriousness of major technological and societal initiatives across three dimensions:</p>
+                <p>This visualization shows the thermodynamic seriousness of CSI 300 companies across three dimensions:</p>
 
                 <div class="framework-explanation">
                     <div class="parameter">
                         <h3>E (Energy & Resources)</h3>
-                        <p>Does the initiative add net new resources (funding, power, materials) to the US system?</p>
+                        <p>Does the company add net new resources (funding, power, materials) to the Chinese economy?</p>
                     </div>
                     <div class="parameter">
                         <h3>v (Infrastructure & Efficiency)</h3>
-                        <p>Does the initiative build durable capacity and enhance resource utilization?</p>
+                        <p>Does the company build durable capacity and enhance resource utilization?</p>
                     </div>
                     <div class="parameter">
                         <h3>α (Order & Coordination)</h3>
-                        <p>Does the initiative reduce disorder, inspire cooperation, or increase division?</p>
+                        <p>Does the company reduce disorder, inspire cooperation, or increase division?</p>
                     </div>
                 </div>
 
                 <p style="margin-top: 2rem;">
+                    Each sphere's size represents the company's weight in the CSI 300 index.
                     Toggle between 3D and 2D views to explore different perspectives of the data.
-                    Hover over any idea to see detailed information, or click to pin the details panel.
+                    Hover over any company to see detailed information.
                 </p>
             </div>
         </section>
@@ -271,45 +277,96 @@
     </footer>
 
     <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://ausdneaevmkubvsygwdo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1c2RuZWFldm1rdWJ2c3lnd2RvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1NDMyNDAsImV4cCI6MjA3NjExOTI0MH0.H5_XhCEqzr4IxqQxue9-tWPYOMNf6kpJc05yKHdacHs';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         let dataset = [];
         let currentView = '3d';
+        let currentSectorFilter = 'all';
         let currentDesignationFilter = 'all';
-        let selectedIdea = null;
+        let selectedCompany = null;
 
-        // Load CSV data
-        d3.csv('/data/big_ideas_seriousness.csv').then(function(data) {
-            dataset = data.map(d => ({
-                name: d.name,
-                E_adj: parseFloat(d.E_adj),
-                v_adj: parseFloat(d.v_adj),
-                alpha_adj: parseFloat(d.alpha_adj),
-                designation: d.designation,
-                rationale: d.rationale,
-                milestone: d.milestone,
-                magnitude: Math.sqrt(
-                    Math.pow(parseFloat(d.E_adj), 2) +
-                    Math.pow(parseFloat(d.v_adj), 2) +
-                    Math.pow(parseFloat(d.alpha_adj), 2)
-                )
-            }));
+        // Load data from Supabase
+        async function loadData() {
+            try {
+                // Get all CSI 300 evaluations from Supabase
+                // Filter by 'csi300' in the categories array
+                const { data: evaluations, error } = await supabase
+                    .from('evaluations')
+                    .select(`
+                        *,
+                        evaluation_targets!inner (
+                            name,
+                            metadata
+                        )
+                    `)
+                    .eq('context', 'China')
+                    .eq('model', 'claude-3-7-sonnet-20250219')
+                    .eq('prompt_version', '1.0')
+                    .contains('evaluation_targets.metadata', { categories: ['csi300'] });
 
-            updateStats();
-            render3D();
-        });
+                if (error) throw error;
+
+                // Transform data to match expected format
+                dataset = evaluations.map(d => ({
+                    ticker: d.evaluation_targets.metadata?.Ticker || '',
+                    security: d.evaluation_targets.name,
+                    segment: d.evaluation_targets.metadata?.Segment || 'Unknown',
+                    exchange: d.evaluation_targets.metadata?.Exchange || '',
+                    weight: parseFloat(d.evaluation_targets.metadata?.['Weighting (%)'] || 0),
+                    E_adj: d.e_adj,
+                    v_adj: d.v_adj,
+                    alpha_adj: d.alpha_adj,
+                    designation: d.designation,
+                    rationale: d.rationale,
+                    magnitude: Math.sqrt(
+                        Math.pow(d.e_adj, 2) +
+                        Math.pow(d.v_adj, 2) +
+                        Math.pow(d.alpha_adj, 2)
+                    )
+                }));
+
+                // Populate sector filter
+                const sectors = [...new Set(dataset.map(d => d.segment))].sort();
+                const sectorFilter = document.getElementById('sector-filter');
+                sectors.forEach(sector => {
+                    const option = document.createElement('option');
+                    option.value = sector;
+                    option.textContent = sector;
+                    sectorFilter.appendChild(option);
+                });
+
+                updateStats();
+                render3D();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('plot-container').innerHTML =
+                    `<div style="padding: 2rem; text-align: center; color: #e74c3c;">
+                        Error loading data: ${error.message}
+                    </div>`;
+            }
+        }
+
+        // Load data on page load
+        loadData();
 
         function getFilteredData() {
             return dataset.filter(d => {
+                const sectorMatch = currentSectorFilter === 'all' || d.segment === currentSectorFilter;
                 const designationMatch = currentDesignationFilter === 'all' || d.designation === currentDesignationFilter;
-                return designationMatch;
+                return sectorMatch && designationMatch;
             });
         }
 
-        function updateRationalePanel(idea, isPinned = false) {
+        function updateRationalePanel(company, isPinned = false) {
             const panel = document.getElementById('rationale-panel');
-            if (!idea) {
+            if (!company) {
                 panel.innerHTML = `
-                    <h3>Idea Details</h3>
-                    <div class="placeholder">Click on an idea to pin details, or hover to preview</div>
+                    <h3>Company Details</h3>
+                    <div class="placeholder">Click on a company to pin details, or hover to preview</div>
                 `;
                 return;
             }
@@ -318,22 +375,24 @@
                 ' <span style="color: #6c757d; font-size: 0.9rem;">(Pinned - click another to change or <a href="#" id="unpin-link" style="color: #3498db; text-decoration: underline; cursor: pointer;">click here</a> to release)</span>' : '';
 
             panel.innerHTML = `
-                <h3>Idea Details${pinnedIndicator}</h3>
-                <div class="company-name">${idea.name}</div>
+                <h3>Company Details${pinnedIndicator}</h3>
+                <div class="company-name">${company.security}</div>
                 <div class="company-info">
-                    <strong>Designation:</strong> ${idea.designation}
+                    <strong>Ticker:</strong> ${company.ticker}<br>
+                    <strong>Sector:</strong> ${company.segment}<br>
+                    <strong>Exchange:</strong> ${company.exchange}<br>
+                    <strong>CSI 300 Weight:</strong> ${company.weight.toFixed(2)}%<br>
+                    <strong>Designation:</strong> ${company.designation}
                 </div>
                 <div class="company-info">
                     <strong>Dimensions:</strong><br>
-                    E (Resources): ${idea.E_adj.toFixed(2)}<br>
-                    v (Infrastructure): ${idea.v_adj.toFixed(2)}<br>
-                    α (Order): ${idea.alpha_adj.toFixed(2)}<br>
-                    Magnitude: ${idea.magnitude.toFixed(3)}
+                    E (Resources): ${company.E_adj.toFixed(2)}<br>
+                    v (Infrastructure): ${company.v_adj.toFixed(2)}<br>
+                    α (Order): ${company.alpha_adj.toFixed(2)}<br>
+                    Magnitude: ${company.magnitude.toFixed(3)}
                 </div>
-                <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">Milestone</h4>
-                <div class="rationale-text">${idea.milestone}</div>
                 <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">Rationale</h4>
-                <div class="rationale-text">${idea.rationale}</div>
+                <div class="rationale-text">${company.rationale}</div>
             `;
 
             // Add event listener for unpin link
@@ -342,7 +401,7 @@
                 if (unpinLink) {
                     unpinLink.addEventListener('click', function(e) {
                         e.preventDefault();
-                        selectedIdea = null;
+                        selectedCompany = null;
                         updateRationalePanel(null);
                     });
                 }
@@ -363,7 +422,7 @@
                 mode: 'markers',
                 type: 'scatter3d',
                 marker: {
-                    size: 12,  // Uniform size for ideas
+                    size: filteredData.map(d => Math.max(5, d.weight * 10)),
                     color: filteredData.map(d => d.magnitude),
                     colorscale: 'Viridis',
                     opacity: 0.8,
@@ -374,8 +433,10 @@
                     showscale: false
                 },
                 text: filteredData.map(d =>
-                    `<b>${d.name}</b><br>` +
+                    `<b>${d.security} (${d.ticker})</b><br>` +
+                    `Sector: ${d.segment}<br>` +
                     `Designation: ${d.designation}<br>` +
+                    `Weight: ${d.weight.toFixed(2)}%<br>` +
                     `E: ${d.E_adj.toFixed(2)}<br>` +
                     `v: ${d.v_adj.toFixed(2)}<br>` +
                     `α: ${d.alpha_adj.toFixed(2)}<br>` +
@@ -477,13 +538,13 @@
                     plotDiv.on('plotly_click', function(data) {
                         const pointIndex = data.points[0].customdata;
                         if (pointIndex !== undefined) {
-                            selectedIdea = filteredData[pointIndex];
-                            updateRationalePanel(selectedIdea, true);
+                            selectedCompany = filteredData[pointIndex];
+                            updateRationalePanel(selectedCompany, true);
                         }
                     });
 
                     plotDiv.on('plotly_hover', function(data) {
-                        if (!selectedIdea) {
+                        if (!selectedCompany) {
                             const pointIndex = data.points[0].customdata;
                             if (pointIndex !== undefined) {
                                 updateRationalePanel(filteredData[pointIndex], false);
@@ -492,14 +553,14 @@
                     });
 
                     plotDiv.on('plotly_unhover', function() {
-                        if (!selectedIdea) {
+                        if (!selectedCompany) {
                             updateRationalePanel(null);
                         }
                     });
 
                     // Show selected company if one was pinned
-                    if (selectedIdea) {
-                        updateRationalePanel(selectedIdea, true);
+                    if (selectedCompany) {
+                        updateRationalePanel(selectedCompany, true);
                     }
                 });
         }
@@ -513,7 +574,7 @@
                 mode: 'markers',
                 type: 'scatter',
                 marker: {
-                    size: 12,  // Uniform size for ideas
+                    size: filteredData.map(d => Math.max(5, d.weight * 15)),
                     color: filteredData.map(d => d.magnitude),
                     colorscale: 'Viridis',
                     opacity: 0.8,
@@ -523,8 +584,10 @@
                     }
                 },
                 text: filteredData.map(d =>
-                    `<b>${d.name}</b><br>` +
-                    `Designation: ${d.designation}`
+                    `<b>${d.security} (${d.ticker})</b><br>` +
+                    `Sector: ${d.segment}<br>` +
+                    `Designation: ${d.designation}<br>` +
+                    `Weight: ${d.weight.toFixed(2)}%`
                 ),
                 hoverinfo: 'text',
                 showlegend: false,
@@ -583,13 +646,13 @@
                 plotDiv.on('plotly_click', function(data) {
                     const pointIndex = data.points[0].customdata;
                     if (pointIndex !== undefined) {
-                        selectedIdea = filteredData[pointIndex];
-                        updateRationalePanel(selectedIdea, true);
+                        selectedCompany = filteredData[pointIndex];
+                        updateRationalePanel(selectedCompany, true);
                     }
                 });
 
                 plotDiv.on('plotly_hover', function(data) {
-                    if (!selectedIdea) {
+                    if (!selectedCompany) {
                         const pointIndex = data.points[0].customdata;
                         if (pointIndex !== undefined) {
                             updateRationalePanel(filteredData[pointIndex], false);
@@ -598,15 +661,15 @@
                 });
 
                 plotDiv.on('plotly_unhover', function() {
-                    if (!selectedIdea) {
+                    if (!selectedCompany) {
                         updateRationalePanel(null);
                     }
                 });
             });
 
             // Show selected company if one was pinned
-            if (selectedIdea) {
-                updateRationalePanel(selectedIdea, true);
+            if (selectedCompany) {
+                updateRationalePanel(selectedCompany, true);
             }
         }
 
@@ -615,11 +678,12 @@
             const statsGrid = document.getElementById('stats-grid');
 
             const stats = [
-                { label: 'Total Ideas', value: filteredData.length },
+                { label: 'Total Companies', value: filteredData.length },
                 { label: 'Serious', value: filteredData.filter(d => d.designation === 'Serious').length },
                 { label: 'Anti-serious', value: filteredData.filter(d => d.designation === 'Anti-serious').length },
                 { label: 'Unserious', value: filteredData.filter(d => d.designation === 'Unserious').length },
-                { label: 'Avg Magnitude', value: (filteredData.reduce((sum, d) => sum + d.magnitude, 0) / filteredData.length).toFixed(3) }
+                { label: 'Avg Magnitude', value: (filteredData.reduce((sum, d) => sum + d.magnitude, 0) / filteredData.length).toFixed(3) },
+                { label: 'Avg Weight', value: (filteredData.reduce((sum, d) => sum + d.weight, 0) / filteredData.length).toFixed(2) + '%' }
             ];
 
             statsGrid.innerHTML = stats.map(stat => `
@@ -643,6 +707,16 @@
             document.getElementById('btn-2d').classList.add('active');
             document.getElementById('btn-3d').classList.remove('active');
             render2D();
+        });
+
+        document.getElementById('sector-filter').addEventListener('change', function(e) {
+            currentSectorFilter = e.target.value;
+            updateStats();
+            if (currentView === '3d') {
+                render3D();
+            } else {
+                render2D();
+            }
         });
 
         document.getElementById('designation-filter').addEventListener('change', function(e) {

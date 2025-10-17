@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Big Ideas Seriousness Analysis - IsXSerious.com</title>
-    <meta name="description" content="Interactive 3D visualization of the thermodynamic seriousness of major technological and societal initiatives. Explore how big ideas contribute to civilizational progress.">
+    <title>EA Cause Areas Seriousness Analysis - IsXSerious.com</title>
+    <meta name="description" content="Interactive 3D visualization of the thermodynamic seriousness of Effective Altruism cause areas. Explore how EA interventions contribute to or detract from systemic order in the United States.">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://isxserious.com/tech.html">
-    <meta property="og:title" content="Big Ideas Seriousness Analysis - IsXSerious.com">
-    <meta property="og:description" content="Interactive 3D visualization of the thermodynamic seriousness of major technological and societal initiatives. Explore how big ideas contribute to civilizational progress.">
+    <meta property="og:url" content="https://isxserious.com/ea_causes.html">
+    <meta property="og:title" content="EA Cause Areas Seriousness Analysis - IsXSerious.com">
+    <meta property="og:description" content="Interactive 3D visualization of the thermodynamic seriousness of Effective Altruism cause areas. Explore how EA interventions contribute to or detract from systemic order in the United States.">
     <meta property="og:image" content="https://isxserious.com/preview_compressed.jpg">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://isxserious.com/tech.html">
-    <meta property="twitter:title" content="Big Ideas Seriousness Analysis - IsXSerious.com">
-    <meta property="twitter:description" content="Interactive 3D visualization of the thermodynamic seriousness of major technological and societal initiatives. Explore how big ideas contribute to civilizational progress.">
+    <meta property="twitter:url" content="https://isxserious.com/ea_causes.html">
+    <meta property="twitter:title" content="EA Cause Areas Seriousness Analysis - IsXSerious.com">
+    <meta property="twitter:description" content="Interactive 3D visualization of the thermodynamic seriousness of Effective Altruism cause areas. Explore how EA interventions contribute to or detract from systemic order in the United States.">
     <meta property="twitter:image" content="https://isxserious.com/preview_compressed.jpg">
 
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
     <style>
         .viz-container {
@@ -91,14 +91,14 @@
             font-size: 1.3rem;
         }
 
-        #rationale-panel .company-name {
+        #rationale-panel .cause-name {
             font-size: 1.2rem;
             font-weight: 600;
             color: #3498db;
             margin-bottom: 0.5rem;
         }
 
-        #rationale-panel .company-info {
+        #rationale-panel .cause-info {
             font-size: 0.95rem;
             color: #6c757d;
             margin-bottom: 1rem;
@@ -200,8 +200,8 @@
     <main>
         <section class="hero">
             <div class="container">
-                <h1>Big Ideas Seriousness Analysis</h1>
-                <p class="subtitle">Thermodynamic evaluation of major technological and societal initiatives</p>
+                <h1>EA Cause Areas Seriousness Analysis</h1>
+                <p class="subtitle">Thermodynamic evaluation of Effective Altruism interventions in the US context</p>
             </div>
         </section>
 
@@ -212,6 +212,11 @@
             </div>
 
             <div class="filter-controls">
+                <label for="domain-filter">Filter by Domain:</label>
+                <select id="domain-filter">
+                    <option value="all">All Domains</option>
+                </select>
+
                 <label for="designation-filter">Filter by Designation:</label>
                 <select id="designation-filter">
                     <option value="all">All Designations</option>
@@ -225,8 +230,8 @@
             <div class="viz-layout">
                 <div id="plot-container"></div>
                 <div id="rationale-panel">
-                    <h3>Idea Details</h3>
-                    <div class="placeholder">Click on an idea to pin details, or hover to preview</div>
+                    <h3>Cause Area Details</h3>
+                    <div class="placeholder">Hover over a cause area to see details</div>
                 </div>
             </div>
         </section>
@@ -239,26 +244,27 @@
         <section class="about-section">
             <div class="container">
                 <h2>About This Analysis</h2>
-                <p>This visualization shows the thermodynamic seriousness of major technological and societal initiatives across three dimensions:</p>
+                <p>This visualization shows the thermodynamic seriousness of EA cause areas across three dimensions in the context of the United States:</p>
 
                 <div class="framework-explanation">
                     <div class="parameter">
                         <h3>E (Energy & Resources)</h3>
-                        <p>Does the initiative add net new resources (funding, power, materials) to the US system?</p>
+                        <p>Does the cause area add net new resources (funding, power, materials) to the US system?</p>
                     </div>
                     <div class="parameter">
                         <h3>v (Infrastructure & Efficiency)</h3>
-                        <p>Does the initiative build durable capacity and enhance resource utilization?</p>
+                        <p>Does the cause area build durable capacity and enhance resource utilization?</p>
                     </div>
                     <div class="parameter">
                         <h3>α (Order & Coordination)</h3>
-                        <p>Does the initiative reduce disorder, inspire cooperation, or increase division?</p>
+                        <p>Does the cause area reduce disorder, inspire cooperation, or increase division?</p>
                     </div>
                 </div>
 
                 <p style="margin-top: 2rem;">
+                    Each sphere is colored by its domain (Global Health, Animal Welfare, Longtermism, Climate, Meta).
                     Toggle between 3D and 2D views to explore different perspectives of the data.
-                    Hover over any idea to see detailed information, or click to pin the details panel.
+                    Hover over any cause area to see detailed information.
                 </p>
             </div>
         </section>
@@ -271,45 +277,112 @@
     </footer>
 
     <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://ausdneaevmkubvsygwdo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1c2RuZWFldm1rdWJ2c3lnd2RvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1NDMyNDAsImV4cCI6MjA3NjExOTI0MH0.H5_XhCEqzr4IxqQxue9-tWPYOMNf6kpJc05yKHdacHs';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         let dataset = [];
         let currentView = '3d';
+        let currentDomainFilter = 'all';
         let currentDesignationFilter = 'all';
-        let selectedIdea = null;
+        let selectedCause = null;
 
-        // Load CSV data
-        d3.csv('/data/big_ideas_seriousness.csv').then(function(data) {
-            dataset = data.map(d => ({
-                name: d.name,
-                E_adj: parseFloat(d.E_adj),
-                v_adj: parseFloat(d.v_adj),
-                alpha_adj: parseFloat(d.alpha_adj),
-                designation: d.designation,
-                rationale: d.rationale,
-                milestone: d.milestone,
-                magnitude: Math.sqrt(
-                    Math.pow(parseFloat(d.E_adj), 2) +
-                    Math.pow(parseFloat(d.v_adj), 2) +
-                    Math.pow(parseFloat(d.alpha_adj), 2)
-                )
-            }));
+        // Domain color mapping
+        const domainColors = {
+            'Global Health & Development': '#2ecc71',  // Green
+            'Animal Welfare': '#e74c3c',               // Red
+            'Longtermism / Catastrophic Risk': '#9b59b6', // Purple
+            'Climate': '#3498db',                      // Blue
+            'Meta / Movement Building': '#f39c12'      // Orange
+        };
 
-            updateStats();
-            render3D();
-        });
+        // Load data from Supabase
+        async function loadData() {
+            try {
+                // Get all EA cause area evaluations from Supabase
+                // Filter by names starting with "EA Cause Subarea:"
+                const { data: evaluations, error } = await supabase
+                    .from('evaluations')
+                    .select(`
+                        *,
+                        evaluation_targets!inner (
+                            name,
+                            metadata
+                        )
+                    `)
+                    .eq('context', 'United States')
+                    .eq('model', 'claude-3-7-sonnet-20250219')
+                    .eq('prompt_version', '1.0')
+                    .like('evaluation_targets.name', 'EA Cause Subarea:%');
+
+                if (error) throw error;
+
+                // Transform data to match expected format
+                dataset = evaluations.map(d => {
+                    const name = d.evaluation_targets.name.replace('EA Cause Subarea: ', '');
+                    return {
+                        name: name,
+                        domain: d.evaluation_targets.metadata?.Domain || 'Unknown',
+                        exampleOrgs: d.evaluation_targets.metadata?.['Example Org(s)'] || '',
+                        evaluator: d.evaluation_targets.metadata?.['Primary Evaluator/Source'] || '',
+                        E_adj: d.e_adj,
+                        v_adj: d.v_adj,
+                        alpha_adj: d.alpha_adj,
+                        designation: d.designation,
+                        rationale: d.rationale,
+                        milestone: d.milestone,
+                        magnitude: Math.sqrt(
+                            Math.pow(d.e_adj, 2) +
+                            Math.pow(d.v_adj, 2) +
+                            Math.pow(d.alpha_adj, 2)
+                        )
+                    };
+                });
+
+                // Populate domain filter
+                const domains = [...new Set(dataset.map(d => d.domain))].sort();
+                const domainFilter = document.getElementById('domain-filter');
+                domains.forEach(domain => {
+                    const option = document.createElement('option');
+                    option.value = domain;
+                    option.textContent = domain;
+                    domainFilter.appendChild(option);
+                });
+
+                updateStats();
+                render3D();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('plot-container').innerHTML =
+                    `<div style="padding: 2rem; text-align: center; color: #e74c3c;">
+                        Error loading data: ${error.message}
+                    </div>`;
+            }
+        }
+
+        // Load data on page load
+        loadData();
 
         function getFilteredData() {
             return dataset.filter(d => {
+                const domainMatch = currentDomainFilter === 'all' || d.domain === currentDomainFilter;
                 const designationMatch = currentDesignationFilter === 'all' || d.designation === currentDesignationFilter;
-                return designationMatch;
+                return domainMatch && designationMatch;
             });
         }
 
-        function updateRationalePanel(idea, isPinned = false) {
+        function getDomainColor(domain) {
+            return domainColors[domain] || '#95a5a6';  // Gray for unknown domains
+        }
+
+        function updateRationalePanel(cause, isPinned = false) {
             const panel = document.getElementById('rationale-panel');
-            if (!idea) {
+            if (!cause) {
                 panel.innerHTML = `
-                    <h3>Idea Details</h3>
-                    <div class="placeholder">Click on an idea to pin details, or hover to preview</div>
+                    <h3>Cause Area Details</h3>
+                    <div class="placeholder">Click on a cause area to pin details, or hover to preview</div>
                 `;
                 return;
             }
@@ -318,22 +391,25 @@
                 ' <span style="color: #6c757d; font-size: 0.9rem;">(Pinned - click another to change or <a href="#" id="unpin-link" style="color: #3498db; text-decoration: underline; cursor: pointer;">click here</a> to release)</span>' : '';
 
             panel.innerHTML = `
-                <h3>Idea Details${pinnedIndicator}</h3>
-                <div class="company-name">${idea.name}</div>
-                <div class="company-info">
-                    <strong>Designation:</strong> ${idea.designation}
+                <h3>Cause Area Details${pinnedIndicator}</h3>
+                <div class="cause-name">${cause.name}</div>
+                <div class="cause-info">
+                    <strong>Domain:</strong> ${cause.domain}<br>
+                    <strong>Example Organizations:</strong> ${cause.exampleOrgs}<br>
+                    <strong>Primary Evaluator:</strong> ${cause.evaluator}<br>
+                    <strong>Designation:</strong> ${cause.designation}
                 </div>
-                <div class="company-info">
+                <div class="cause-info">
                     <strong>Dimensions:</strong><br>
-                    E (Resources): ${idea.E_adj.toFixed(2)}<br>
-                    v (Infrastructure): ${idea.v_adj.toFixed(2)}<br>
-                    α (Order): ${idea.alpha_adj.toFixed(2)}<br>
-                    Magnitude: ${idea.magnitude.toFixed(3)}
+                    E (Resources): ${cause.E_adj.toFixed(2)}<br>
+                    v (Infrastructure): ${cause.v_adj.toFixed(2)}<br>
+                    α (Order): ${cause.alpha_adj.toFixed(2)}<br>
+                    Magnitude: ${cause.magnitude.toFixed(3)}
                 </div>
                 <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">Milestone</h4>
-                <div class="rationale-text">${idea.milestone}</div>
+                <div class="rationale-text">${cause.milestone}</div>
                 <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">Rationale</h4>
-                <div class="rationale-text">${idea.rationale}</div>
+                <div class="rationale-text">${cause.rationale}</div>
             `;
 
             // Add event listener for unpin link
@@ -342,7 +418,7 @@
                 if (unpinLink) {
                     unpinLink.addEventListener('click', function(e) {
                         e.preventDefault();
-                        selectedIdea = null;
+                        selectedCause = null;
                         updateRationalePanel(null);
                     });
                 }
@@ -363,18 +439,17 @@
                 mode: 'markers',
                 type: 'scatter3d',
                 marker: {
-                    size: 12,  // Uniform size for ideas
-                    color: filteredData.map(d => d.magnitude),
-                    colorscale: 'Viridis',
+                    size: 12,  // Uniform size for cause areas
+                    color: filteredData.map(d => getDomainColor(d.domain)),
                     opacity: 0.8,
                     line: {
                         color: 'white',
                         width: 0.5
-                    },
-                    showscale: false
+                    }
                 },
                 text: filteredData.map(d =>
                     `<b>${d.name}</b><br>` +
+                    `Domain: ${d.domain}<br>` +
                     `Designation: ${d.designation}<br>` +
                     `E: ${d.E_adj.toFixed(2)}<br>` +
                     `v: ${d.v_adj.toFixed(2)}<br>` +
@@ -477,13 +552,13 @@
                     plotDiv.on('plotly_click', function(data) {
                         const pointIndex = data.points[0].customdata;
                         if (pointIndex !== undefined) {
-                            selectedIdea = filteredData[pointIndex];
-                            updateRationalePanel(selectedIdea, true);
+                            selectedCause = filteredData[pointIndex];
+                            updateRationalePanel(selectedCause, true);
                         }
                     });
 
                     plotDiv.on('plotly_hover', function(data) {
-                        if (!selectedIdea) {
+                        if (!selectedCause) {
                             const pointIndex = data.points[0].customdata;
                             if (pointIndex !== undefined) {
                                 updateRationalePanel(filteredData[pointIndex], false);
@@ -492,14 +567,14 @@
                     });
 
                     plotDiv.on('plotly_unhover', function() {
-                        if (!selectedIdea) {
+                        if (!selectedCause) {
                             updateRationalePanel(null);
                         }
                     });
 
-                    // Show selected company if one was pinned
-                    if (selectedIdea) {
-                        updateRationalePanel(selectedIdea, true);
+                    // Show selected cause if one was pinned
+                    if (selectedCause) {
+                        updateRationalePanel(selectedCause, true);
                     }
                 });
         }
@@ -513,9 +588,8 @@
                 mode: 'markers',
                 type: 'scatter',
                 marker: {
-                    size: 12,  // Uniform size for ideas
-                    color: filteredData.map(d => d.magnitude),
-                    colorscale: 'Viridis',
+                    size: 12,  // Uniform size for cause areas
+                    color: filteredData.map(d => getDomainColor(d.domain)),
                     opacity: 0.8,
                     line: {
                         color: 'white',
@@ -524,6 +598,7 @@
                 },
                 text: filteredData.map(d =>
                     `<b>${d.name}</b><br>` +
+                    `Domain: ${d.domain}<br>` +
                     `Designation: ${d.designation}`
                 ),
                 hoverinfo: 'text',
@@ -583,13 +658,13 @@
                 plotDiv.on('plotly_click', function(data) {
                     const pointIndex = data.points[0].customdata;
                     if (pointIndex !== undefined) {
-                        selectedIdea = filteredData[pointIndex];
-                        updateRationalePanel(selectedIdea, true);
+                        selectedCause = filteredData[pointIndex];
+                        updateRationalePanel(selectedCause, true);
                     }
                 });
 
                 plotDiv.on('plotly_hover', function(data) {
-                    if (!selectedIdea) {
+                    if (!selectedCause) {
                         const pointIndex = data.points[0].customdata;
                         if (pointIndex !== undefined) {
                             updateRationalePanel(filteredData[pointIndex], false);
@@ -598,15 +673,15 @@
                 });
 
                 plotDiv.on('plotly_unhover', function() {
-                    if (!selectedIdea) {
+                    if (!selectedCause) {
                         updateRationalePanel(null);
                     }
                 });
             });
 
-            // Show selected company if one was pinned
-            if (selectedIdea) {
-                updateRationalePanel(selectedIdea, true);
+            // Show selected cause if one was pinned
+            if (selectedCause) {
+                updateRationalePanel(selectedCause, true);
             }
         }
 
@@ -615,7 +690,7 @@
             const statsGrid = document.getElementById('stats-grid');
 
             const stats = [
-                { label: 'Total Ideas', value: filteredData.length },
+                { label: 'Total Cause Areas', value: filteredData.length },
                 { label: 'Serious', value: filteredData.filter(d => d.designation === 'Serious').length },
                 { label: 'Anti-serious', value: filteredData.filter(d => d.designation === 'Anti-serious').length },
                 { label: 'Unserious', value: filteredData.filter(d => d.designation === 'Unserious').length },
@@ -643,6 +718,16 @@
             document.getElementById('btn-2d').classList.add('active');
             document.getElementById('btn-3d').classList.remove('active');
             render2D();
+        });
+
+        document.getElementById('domain-filter').addEventListener('change', function(e) {
+            currentDomainFilter = e.target.value;
+            updateStats();
+            if (currentView === '3d') {
+                render3D();
+            } else {
+                render2D();
+            }
         });
 
         document.getElementById('designation-filter').addEventListener('change', function(e) {
