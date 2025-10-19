@@ -230,6 +230,177 @@
                 max-height: 400px;
             }
         }
+
+        /* Data Table Styles */
+        .table-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .table-controls {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-family: 'Crimson Text', serif;
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .data-table thead {
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table th {
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        .data-table th:hover {
+            background: #e9ecef;
+        }
+
+        .data-table th.sortable::after {
+            content: ' ↕';
+            color: #bdc3c7;
+            font-size: 0.8rem;
+        }
+
+        .data-table th.sorted-asc::after {
+            content: ' ↑';
+            color: #3498db;
+        }
+
+        .data-table th.sorted-desc::after {
+            content: ' ↓';
+            color: #3498db;
+        }
+
+        .data-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e9ecef;
+            color: #2c3e50;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .data-table .politician-name {
+            font-weight: 600;
+            color: #3498db;
+        }
+
+        .data-table .score-positive {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .data-table .score-negative {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .data-table .score-neutral {
+            color: #f39c12;
+            font-weight: 600;
+        }
+
+        .designation-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .designation-serious {
+            background: #d4edda;
+            color: #27ae60;
+        }
+
+        .designation-antiSerious {
+            background: #f8d7da;
+            color: #e74c3c;
+        }
+
+        .designation-unserious {
+            background: #fff3cd;
+            color: #f39c12;
+        }
+
+        .model-column {
+            background: #f8f9fa;
+        }
+
+        .table-summary {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .table-summary h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.2rem;
+        }
+
+        .table-summary p {
+            line-height: 1.7;
+            color: #2c3e50;
+            margin-bottom: 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+            .data-table {
+                font-size: 0.85rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 8px 4px;
+            }
+        }
     </style>
     <script src="nav.js"></script>
 </head>
@@ -313,6 +484,45 @@
         <section class="stats-container">
             <h2 style="text-align: center; margin-bottom: 1rem;">Model Agreement Statistics</h2>
             <div class="stats-grid" id="stats-grid"></div>
+        </section>
+
+        <section class="table-container">
+            <h2 style="text-align: center; margin-bottom: 1.5rem;">Detailed Model Comparison</h2>
+
+            <div class="table-controls">
+                <div class="search-box">
+                    <input type="text" id="table-search" placeholder="Search politicians...">
+                </div>
+                <div style="color: #6c757d; font-size: 0.9rem;">
+                    <span id="row-count">0</span> politicians
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="data-table" id="comparison-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="name">Politician</th>
+                            <th class="sortable" data-column="orientation">Orientation</th>
+                            <th class="sortable" data-column="gpt5_e">GPT-5 E</th>
+                            <th class="sortable" data-column="gpt5_v">GPT-5 v</th>
+                            <th class="sortable" data-column="gpt5_alpha">GPT-5 α</th>
+                            <th class="sortable" data-column="gpt5_designation">GPT-5 Designation</th>
+                            <th class="sortable" data-column="claude_e">Claude E</th>
+                            <th class="sortable" data-column="claude_v">Claude v</th>
+                            <th class="sortable" data-column="claude_alpha">Claude α</th>
+                            <th class="sortable" data-column="claude_designation">Claude Designation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-summary" id="table-summary">
+                <!-- Populated by JavaScript -->
+            </div>
         </section>
 
         <section class="about-section">
@@ -424,6 +634,7 @@
                 });
 
                 updateStats();
+                renderTable();
                 render3D();
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -926,6 +1137,165 @@
                 </div>
             `).join('');
         }
+
+        // Table functionality
+        let tableData = [];
+        let currentSort = { column: null, direction: 'asc' };
+        let searchTerm = '';
+
+        function formatScore(value) {
+            const formatted = value?.toFixed(2) || '0.00';
+            if (value > 0.1) return `<span class="score-positive">${formatted}</span>`;
+            if (value < -0.1) return `<span class="score-negative">${formatted}</span>`;
+            return `<span class="score-neutral">${formatted}</span>`;
+        }
+
+        function getDesignationClass(designation) {
+            if (designation === 'Serious') return 'designation-serious';
+            if (designation === 'Anti-serious') return 'designation-antiSerious';
+            return 'designation-unserious';
+        }
+
+        function renderTable() {
+            tableData = dataset.map(d => ({
+                name: d.name,
+                orientation: d.metadata?.orientation || 'N/A',
+                gpt5_e: d.gpt5.e_adj,
+                gpt5_v: d.gpt5.v_adj,
+                gpt5_alpha: d.gpt5.alpha_adj,
+                gpt5_designation: d.gpt5.designation,
+                claude_e: d.claude.e_adj,
+                claude_v: d.claude.v_adj,
+                claude_alpha: d.claude.alpha_adj,
+                claude_designation: d.claude.designation
+            }));
+
+            updateTableDisplay();
+            generateTableSummary();
+        }
+
+        function updateTableDisplay() {
+            let filteredData = tableData;
+
+            // Apply search filter
+            if (searchTerm) {
+                filteredData = filteredData.filter(row =>
+                    row.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    row.orientation.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+            }
+
+            // Apply sorting
+            if (currentSort.column) {
+                filteredData.sort((a, b) => {
+                    let aVal = a[currentSort.column];
+                    let bVal = b[currentSort.column];
+
+                    // Handle numeric vs string comparison
+                    if (typeof aVal === 'number' && typeof bVal === 'number') {
+                        return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+                    } else {
+                        aVal = String(aVal).toLowerCase();
+                        bVal = String(bVal).toLowerCase();
+                        if (currentSort.direction === 'asc') {
+                            return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+                        } else {
+                            return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+                        }
+                    }
+                });
+            }
+
+            // Update row count
+            document.getElementById('row-count').textContent = filteredData.length;
+
+            // Render table rows
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = filteredData.map(row => `
+                <tr>
+                    <td class="politician-name">${row.name}</td>
+                    <td>${row.orientation}</td>
+                    <td>${formatScore(row.gpt5_e)}</td>
+                    <td>${formatScore(row.gpt5_v)}</td>
+                    <td>${formatScore(row.gpt5_alpha)}</td>
+                    <td><span class="designation-badge ${getDesignationClass(row.gpt5_designation)}">${row.gpt5_designation}</span></td>
+                    <td class="model-column">${formatScore(row.claude_e)}</td>
+                    <td class="model-column">${formatScore(row.claude_v)}</td>
+                    <td class="model-column">${formatScore(row.claude_alpha)}</td>
+                    <td class="model-column"><span class="designation-badge ${getDesignationClass(row.claude_designation)}">${row.claude_designation}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function generateTableSummary() {
+            // Calculate comparative statistics
+            const total = dataset.length;
+            const designationMatch = dataset.filter(d => d.claude.designation === d.gpt5.designation).length;
+            const designationMatchPct = ((designationMatch / total) * 100).toFixed(1);
+
+            // Calculate average differences
+            let avgEDiff = 0, avgVDiff = 0, avgAlphaDiff = 0;
+            dataset.forEach(d => {
+                avgEDiff += Math.abs(d.claude.e_adj - d.gpt5.e_adj);
+                avgVDiff += Math.abs(d.claude.v_adj - d.gpt5.v_adj);
+                avgAlphaDiff += Math.abs(d.claude.alpha_adj - d.gpt5.alpha_adj);
+            });
+            avgEDiff /= total;
+            avgVDiff /= total;
+            avgAlphaDiff /= total;
+
+            // Count who is more generous/harsh
+            let claudeMorePositive = 0, gpt5MorePositive = 0;
+            dataset.forEach(d => {
+                const claudeAvg = (d.claude.e_adj + d.claude.v_adj + d.claude.alpha_adj) / 3;
+                const gpt5Avg = (d.gpt5.e_adj + d.gpt5.v_adj + d.gpt5.alpha_adj) / 3;
+                if (claudeAvg > gpt5Avg) claudeMorePositive++;
+                else if (gpt5Avg > claudeAvg) gpt5MorePositive++;
+            });
+
+            // Determine which model is stricter overall
+            const claudeAvgAll = dataset.reduce((sum, d) =>
+                sum + (d.claude.e_adj + d.claude.v_adj + d.claude.alpha_adj) / 3, 0) / total;
+            const gpt5AvgAll = dataset.reduce((sum, d) =>
+                sum + (d.gpt5.e_adj + d.gpt5.v_adj + d.gpt5.alpha_adj) / 3, 0) / total;
+
+            const summaryDiv = document.getElementById('table-summary');
+            summaryDiv.innerHTML = `
+                <h3>Model Comparison Summary</h3>
+                <p><strong>Agreement:</strong> Claude and GPT-5 agreed on the overall designation (Serious, Anti-serious, or Unserious) for ${designationMatch} out of ${total} politicians (${designationMatchPct}%).</p>
+
+                <p><strong>Dimensional Differences:</strong> On average across all ${total} politicians, the models differed by ${avgEDiff.toFixed(3)} on Energy (E), ${avgVDiff.toFixed(3)} on Infrastructure (v), and ${avgAlphaDiff.toFixed(3)} on Order (α). ${avgAlphaDiff > avgEDiff && avgAlphaDiff > avgVDiff ? 'The largest disagreements were on Order (α), suggesting the models have different interpretations of social cohesion and coordination.' : avgEDiff > avgVDiff ? 'The largest disagreements were on Energy (E), indicating differing views on resource contribution.' : 'The largest disagreements were on Infrastructure (v), showing different assessments of institutional impact.'}</p>
+
+                <p><strong>Overall Tendencies:</strong> ${Math.abs(claudeAvgAll - gpt5AvgAll) < 0.02 ? 'Both models had remarkably similar average scores across all politicians, with only a ' + Math.abs(claudeAvgAll - gpt5AvgAll).toFixed(3) + ' point difference overall.' : claudeAvgAll > gpt5AvgAll ? 'Claude was generally more generous, with an average score of ' + claudeAvgAll.toFixed(3) + ' compared to GPT-5\'s ' + gpt5AvgAll.toFixed(3) + '. Claude rated ' + claudeMorePositive + ' politicians more positively, while GPT-5 was more positive for ' + gpt5MorePositive + ' politicians.' : 'GPT-5 was generally more generous, with an average score of ' + gpt5AvgAll.toFixed(3) + ' compared to Claude\'s ' + claudeAvgAll.toFixed(3) + '. GPT-5 rated ' + gpt5MorePositive + ' politicians more positively, while Claude was more positive for ' + claudeMorePositive + ' politicians.'}</p>
+            `;
+        }
+
+        // Table event listeners
+        document.querySelectorAll('.data-table th.sortable').forEach(th => {
+            th.addEventListener('click', function() {
+                const column = this.dataset.column;
+
+                if (currentSort.column === column) {
+                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSort.column = column;
+                    currentSort.direction = 'asc';
+                }
+
+                // Update sort indicators
+                document.querySelectorAll('.data-table th').forEach(header => {
+                    header.classList.remove('sorted-asc', 'sorted-desc');
+                });
+                this.classList.add(currentSort.direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
+
+                updateTableDisplay();
+            });
+        });
+
+        document.getElementById('table-search').addEventListener('input', function(e) {
+            searchTerm = e.target.value;
+            updateTableDisplay();
+        });
 
         // Event listeners
         document.getElementById('btn-3d').addEventListener('click', function() {
