@@ -189,6 +189,151 @@
                 max-height: 400px;
             }
         }
+
+        /* Data Table Styles */
+        .table-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .table-controls {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-family: 'Crimson Text', serif;
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .data-table thead {
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table th {
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .data-table th:hover {
+            background: #e9ecef;
+        }
+
+        .data-table th.sortable::after {
+            content: ' ↕';
+            color: #bdc3c7;
+            font-size: 0.8rem;
+        }
+
+        .data-table th.sorted-asc::after {
+            content: ' ↑';
+            color: #3498db;
+        }
+
+        .data-table th.sorted-desc::after {
+            content: ' ↓';
+            color: #3498db;
+        }
+
+        .data-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e9ecef;
+            color: #2c3e50;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .data-table .company-name {
+            font-weight: 600;
+            color: #3498db;
+        }
+
+        .data-table .score-positive {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .data-table .score-negative {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .data-table .score-neutral {
+            color: #f39c12;
+            font-weight: 600;
+        }
+
+        .designation-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .designation-serious {
+            background: #d4edda;
+            color: #27ae60;
+        }
+
+        .designation-antiSerious {
+            background: #f8d7da;
+            color: #e74c3c;
+        }
+
+        .designation-unserious {
+            background: #fff3cd;
+            color: #f39c12;
+        }
+
+        @media (max-width: 768px) {
+            .data-table {
+                font-size: 0.85rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 8px 4px;
+            }
+        }
     </style>
     <script src="nav.js"></script>
 </head>
@@ -239,6 +384,40 @@
         <section class="stats-container">
             <h2 style="text-align: center; margin-bottom: 1rem;">Dataset Statistics</h2>
             <div class="stats-grid" id="stats-grid"></div>
+        </section>
+
+        <section class="table-container">
+            <h2 style="text-align: center; margin-bottom: 1.5rem;">Company Data Table</h2>
+
+            <div class="table-controls">
+                <div class="search-box">
+                    <input type="text" id="table-search" placeholder="Search companies...">
+                </div>
+                <div style="color: #6c757d; font-size: 0.9rem;">
+                    <span id="row-count">0</span> companies
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="data-table" id="company-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="security">Company</th>
+                            <th class="sortable" data-column="symbol">Symbol</th>
+                            <th class="sortable" data-column="sector">Sector</th>
+                            <th class="sortable" data-column="weight">Weight %</th>
+                            <th class="sortable" data-column="E_adj">E</th>
+                            <th class="sortable" data-column="v_adj">v</th>
+                            <th class="sortable" data-column="alpha_adj">α</th>
+                            <th class="sortable" data-column="magnitude">Magnitude</th>
+                            <th class="sortable" data-column="designation">Designation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
         </section>
 
         <section class="about-section">
@@ -341,6 +520,7 @@
                 });
 
                 updateStats();
+                renderTable();
                 render3D();
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -695,6 +875,106 @@
                 </div>
             `).join('');
         }
+
+        // Table functionality
+        let currentSort = { column: null, direction: 'asc' };
+        let searchTerm = '';
+
+        function formatScore(value) {
+            const formatted = value?.toFixed(2) || '0.00';
+            if (value > 0.1) return `<span class="score-positive">${formatted}</span>`;
+            if (value < -0.1) return `<span class="score-negative">${formatted}</span>`;
+            return `<span class="score-neutral">${formatted}</span>`;
+        }
+
+        function getDesignationClass(designation) {
+            if (designation === 'Serious') return 'designation-serious';
+            if (designation === 'Anti-serious') return 'designation-antiSerious';
+            return 'designation-unserious';
+        }
+
+        function renderTable() {
+            updateTableDisplay();
+        }
+
+        function updateTableDisplay() {
+            let filteredData = [...dataset];
+
+            // Apply search filter
+            if (searchTerm) {
+                filteredData = filteredData.filter(row =>
+                    row.security.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    row.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    row.sector.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+            }
+
+            // Apply sorting
+            if (currentSort.column) {
+                filteredData.sort((a, b) => {
+                    let aVal = a[currentSort.column];
+                    let bVal = b[currentSort.column];
+
+                    if (typeof aVal === 'number' && typeof bVal === 'number') {
+                        return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+                    } else {
+                        aVal = String(aVal).toLowerCase();
+                        bVal = String(bVal).toLowerCase();
+                        if (currentSort.direction === 'asc') {
+                            return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+                        } else {
+                            return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+                        }
+                    }
+                });
+            }
+
+            // Update row count
+            document.getElementById('row-count').textContent = filteredData.length;
+
+            // Render table rows
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = filteredData.map(row => `
+                <tr>
+                    <td class="company-name">${row.security}</td>
+                    <td>${row.symbol}</td>
+                    <td>${row.sector}</td>
+                    <td>${row.weight.toFixed(2)}</td>
+                    <td>${formatScore(row.E_adj)}</td>
+                    <td>${formatScore(row.v_adj)}</td>
+                    <td>${formatScore(row.alpha_adj)}</td>
+                    <td>${row.magnitude.toFixed(3)}</td>
+                    <td><span class="designation-badge ${getDesignationClass(row.designation)}">${row.designation}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Table event listeners
+        document.querySelectorAll('.data-table th.sortable').forEach(th => {
+            th.addEventListener('click', function() {
+                const column = this.dataset.column;
+
+                if (currentSort.column === column) {
+                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSort.column = column;
+                    currentSort.direction = 'asc';
+                }
+
+                // Update sort indicators
+                document.querySelectorAll('.data-table th').forEach(header => {
+                    header.classList.remove('sorted-asc', 'sorted-desc');
+                });
+                this.classList.add(currentSort.direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
+
+                updateTableDisplay();
+            });
+        });
+
+        document.getElementById('table-search').addEventListener('input', function(e) {
+            searchTerm = e.target.value;
+            updateTableDisplay();
+        });
 
         // Event listeners
         document.getElementById('btn-3d').addEventListener('click', function() {
